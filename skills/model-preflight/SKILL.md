@@ -55,11 +55,11 @@ new model check. Do not repeat the same recommendation after resuming. If the us
 while paused, evaluate the replacement as a new task.
 
 In Claude Code and Codex, skip this session-level check when the user directly invokes a skill or
-command whose definition assigns a model or effort, or whose whole procedure is one bounded
-mechanical command as the Downshift bullet describes. Let a runtime assignment apply where the tool
-has one, and route the rest as that bullet says, without a model-switch prompt. Detect an assignment
-from the runtime definition rather than maintaining a command allowlist, and apply the normal
-preflight if the task expands beyond the routed workflow.
+command whose definition assigns a model or effort, or whose whole procedure is one of the one-off
+tasks the Downshift bullet describes. Let a runtime assignment apply where the tool has one, and
+route the rest as that bullet says, without a model-switch prompt. Detect an assignment from the
+runtime definition rather than maintaining a command allowlist, and apply the normal preflight if
+the task expands beyond the routed workflow.
 
 ## Triggers
 
@@ -91,18 +91,24 @@ is probably adequate.
 - **Downshift**: the active tier is above what the task warrants. A new task that no Escalate trigger
   reaches is default-tier work, Claude Sonnet at medium or Codex Sol at medium: in code, everyday
   implementation, editing, and review; outside code, explanations, drafting, everyday advice, and
-  summarizing a web page or an ordinary document. A session sitting above that pauses to recommend
-  it; the user's own switch upward covers the task it was made for and nothing after it, so do not
-  keep the tier because the user recently chose it. A whole task that is predetermined and
-  mechanical and will hold the session for a while, such as a format-only pass across a tree, a
-  batch of renames, a series of status checks, or a run of quick facts, lookups, or reformatting,
-  recommends Haiku or Luna. One bounded mechanical command, such as a single rename, a status check,
-  a known command, a directly invoked commit-and-push skill, or a single quick fact, is routed
-  rather than paused on: the skill's model pin where the tool has one, otherwise a subagent on the
-  cheap default tier with only the steps that need the user's answer kept in the main session, or
-  the session model itself when delegation would cost more than it saves, which in chat is always.
-  In Claude Code, a monitor, loop, scheduled run, or other work that must proceed in the background
-  never goes to Haiku, because Haiku cannot run in auto mode.
+  summarizing a web page or an ordinary document. A session sitting above that recommends it only
+  when the switch pays for itself. Switching makes the new model re-read the whole conversation,
+  because each model keeps its own cache, so a downshift pays off only when the work ahead on the
+  cheaper tier outweighs that re-read: at the start of a conversation, or before a series of tasks.
+  A whole task that is predetermined and mechanical and will hold the session for a while, such as a
+  format-only pass across a tree, a batch of renames, a series of status checks, or a run of quick
+  facts, lookups, or reformatting, recommends Haiku or Luna on the same test. A one-off task, such
+  as a single rename, a status check, a known command, a directly invoked commit-and-push skill, or
+  a single quick fact, is never worth a pause, and in a long session neither is any other task too
+  small to repay the re-read: hand it to a subagent on the cheaper tier where Delegation under Tiers
+  favors one, since a subagent reads only its brief, and otherwise keep it on the session model,
+  which in chat is always the answer. Say in the verdict whether you are switching, delegating, or
+  staying. A directly invoked skill whose definition pins a model runs on that pin with no pause.
+  The user's own switch upward covers the task it was made for and nothing after it, so do not keep
+  the tier because the user recently chose it; once that task is done, the same test decides
+  whether to come back down. Escalation is exempt from the test, since a better answer is worth the
+  re-read. In Claude Code, a monitor, loop, scheduled run, or other work that must proceed in the
+  background never goes to Haiku, because Haiku cannot run in auto mode.
 - **Re-check**: run the check again, and state the verdict again, when a fix exposes an adjacent
   defect, when a second round of review findings lands on a file you already changed, when the work
   reaches a second repository or component, when a general question turns into one about the user's
@@ -116,15 +122,16 @@ is probably adequate.
 
 ## Tiers
 
-Read the subsection for the tool you are running in and ignore the other. Claude covers Claude
-Code, Cowork, and claude.ai chat; Codex covers the Codex CLI and app. A matching trigger outranks
-the descriptions here, so a task a trigger sends to Opus or Fable goes there even where a tier below
+Read the Claude or the Codex subsection, whichever matches the tool you are running in, and ignore
+the other. Claude covers Claude Code, Cowork, and claude.ai chat; Codex covers the Codex CLI and
+app. Delegation applies to both, wherever subagents can be spawned. A matching trigger outranks the
+descriptions here, so a task a trigger sends to Opus or Fable goes there even where a tier below
 names it as an example.
 
 ### Claude
 
-- **Haiku**: quick facts, simple lookups, reformatting text, and predetermined mechanical work. It
-  has no effort lever, so the pause names the model alone, and Thinking goes off.
+- **Haiku**: a run of quick facts, simple lookups, or reformatting, and predetermined mechanical
+  work. It has no effort lever, so the pause names the model alone, and Thinking goes off.
 - **Sonnet at medium, Thinking on**: the default tier. In code, implementation, editing,
   exploration, and review; outside code, explanations, drafting, everyday advice, and summaries of a
   web page or a document. Medium is Anthropic's default for Sonnet 5.5 and fits work with a clear
@@ -195,6 +202,29 @@ Claude Code only:
   tier the task warrants, judged by the same triggers as the session-level check. That override needs
   `fork_turns` set to `"none"` or a positive integer, because a full-history fork inherits the
   parent's tier and rejects overrides.
+
+### Delegation, in Claude Code and Codex
+
+A subagent starts from only the brief it is given, so it is the cheap way to put a different tier
+on part of the work: it re-reads nothing of this conversation, where switching the session model
+re-reads all of it. It still costs a startup, and whatever it needs has to fit in the brief.
+
+- Delegate work that stands on its own and can be briefed in a few sentences, when at least one of
+  these holds: it suits a cheaper tier than the session's, such as a mechanical step late in a long
+  session; its raw output is bulky and only a conclusion needs to come back, such as a broad search,
+  a log dump, or a scan of many files; or it splits into independent workstreams that can run at
+  once.
+- Keep it in the foreground when it depends on context that would take longer to brief than to
+  use, when it needs the user's answers along the way, when it is judgment about the conversation in
+  progress, or when it is small enough that the startup costs more than the work.
+- Give a subagent the tier its own task warrants by the same triggers, not the session's: a
+  mechanical step goes cheap, and a delegated review or investigation that an Escalate trigger
+  matches goes up. In Claude Code, set the model on the spawn or in the agent definition; in Codex,
+  set it on the spawn as the subagent bullet above describes.
+- Fan out no wider than the number of independent workstreams, and keep the steps that need the
+  user's answer in the main session.
+
+claude.ai chat has no subagents, so there the choice is only between switching and staying.
 
 On either tool, use the lowest reasoning effort that reliably handles the task.
 
