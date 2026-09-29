@@ -27,6 +27,11 @@ and a skill holding the same text for surfaces that do not run hooks.
 In chat and Cowork the pause names the model menu and its effort or extended thinking control,
 since there is no `/model` command there.
 
+The triggers cover everyday chat as well as code. Summaries, drafting, explanations, and everyday
+advice stay on the default tier. Medical, legal, financial, or safety questions, research that has
+to reconcile conflicting sources, and synthesis across long documents escalate. Quick facts and
+reformatting suit the smallest model.
+
 ## Requirements
 
 The hook runs on either of two runtimes and needs one of them:
