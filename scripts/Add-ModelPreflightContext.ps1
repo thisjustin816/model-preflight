@@ -14,6 +14,9 @@
     between. The reminder carries the Re-check bullet, because a task that grows mid-session is the
     case a per-task check misses.
 
+    add-model-preflight-context.sh beside this script is a POSIX port for hosts without pwsh. The
+    two must produce the same additionalContext, which tests/Test-HookParity.ps1 checks.
+
     Three things in the rules file are a contract: the `## Tiers` and `## Pause` headings, and the
     `- **Escalate**:` / `- **Downshift**:` / `- **Re-check**:` bullets. The matcher wants an indented
     bullet, a bold marker, and a colon. All three bullets have to be present for a file to be used at
@@ -28,7 +31,7 @@
 .PARAMETER RulesPath
     A rules file to read instead of the default order: $env:MODEL_PREFLIGHT_RULES,
     $HOME/.agents/model-strategy.md, $HOME/.codex/AGENTS.md, $HOME/.claude/model-strategy.md, then
-    the copy bundled with this plugin. The first file carrying all three marker bullets wins, so a
+    the skill bundled with this plugin. The first file carrying all three marker bullets wins, so a
     candidate carrying none or only some of them is skipped rather than treated as a policy. An
     explicit path is used on its own, with no fallback, so a typo surfaces as the NOTE rather than
     as silently different policy.
@@ -141,7 +144,7 @@ process {
         (Join-Path $HOME '.agents/model-strategy.md')
         (Join-Path $HOME '.codex/AGENTS.md')
         (Join-Path $HOME '.claude/model-strategy.md')
-        (Join-Path $PSScriptRoot '../rules/model-strategy.md')
+        (Join-Path $PSScriptRoot '../skills/model-preflight/SKILL.md')
     ).Where({ $_ })
 
     $escalate = $null
