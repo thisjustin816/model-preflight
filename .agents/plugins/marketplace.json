@@ -1,0 +1,16 @@
+{
+  "name": "thisjustin816",
+  "interface": {
+    "displayName": "Justin Beeson's agent plugins"
+  },
+  "plugins": [
+    {
+      "name": "model-preflight",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "category": "Workflow"
+    }
+  ]
+}

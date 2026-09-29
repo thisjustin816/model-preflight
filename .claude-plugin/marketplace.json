@@ -1,0 +1,14 @@
+{
+  "name": "thisjustin816",
+  "owner": {
+    "name": "Justin Beeson"
+  },
+  "description": "Justin Beeson's agent plugins.",
+  "plugins": [
+    {
+      "name": "model-preflight",
+      "source": "./",
+      "description": "Checks the session model and effort against the task before work starts, and pauses for a switch when they do not match."
+    }
+  ]
+}
