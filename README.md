@@ -12,19 +12,32 @@ So the check is visible. Every new task gets one sentence naming the setting bei
 recommended and the trigger closest to the task. When the setting is wrong, the session stops and
 waits for you rather than proceeding on the assumption you would have agreed.
 
-Works in Claude Code and Codex. Both call `UserPromptSubmit` the same way and read the same
-response, so one hook script serves both.
+## Where it runs
+
+The plugin carries the policy two ways: a `UserPromptSubmit` hook that injects it into every turn,
+and a skill holding the same text for surfaces that do not run hooks.
+
+| Surface | What loads | How reliable |
+| :- | :- | :- |
+| Claude Code | Hook and skill | Every turn, from the hook |
+| Codex | Hook and skill | Every turn, once you trust the hook (see [Codex caveats](#codex-caveats)) |
+| Cowork | Hook and skill | Every turn where the hook's shell tools exist; the skill otherwise |
+| claude.ai chat | Skill only | Best effort: Claude applies a skill when it judges one relevant, so a task can start without the check |
+
+In chat and Cowork the pause names the model menu and its effort or extended thinking control,
+since there is no `/model` command there.
 
 ## Requirements
 
-PowerShell 7 on PATH as `pwsh`. Check with:
+The hook runs on either of two runtimes and needs one of them:
 
-```powershell
-pwsh -Version
-```
+- PowerShell 7 on PATH as `pwsh`, which it prefers.
+- A POSIX `sh` with `awk`, `sed`, and `find`, which it falls back to when `pwsh` is missing. macOS,
+  Linux, and Git Bash on Windows all have these.
 
-Without it the hook cannot run, and the tool reports a failed hook command on every prompt. Install
-it from <https://github.com/PowerShell/PowerShell> if the check above fails.
+The hook command is `pwsh ... || sh ...`, which parses the same in bash, PowerShell 7, and
+`cmd.exe`, so it works whichever shell the tool launches hooks with. With neither runtime present,
+the tool reports a failed hook command on every prompt. The skill needs nothing.
 
 ## Install
 
@@ -59,6 +72,8 @@ The hook makes no network calls and sends nothing anywhere. On each prompt it:
   full-block and reminder cadence.
 - Prints the injected text to stdout, where the tool reads it as additional context.
 
+The skill is instructions only and runs nothing.
+
 ## How it differs from similar plugins
 
 Several plugins route models from a `UserPromptSubmit` hook. The two nearest:
@@ -87,8 +102,9 @@ part that matters mid-session.
 
 ## Changing what it recommends
 
-The policy lives in [rules/model-strategy.md](rules/model-strategy.md), read at runtime. Edit that
-file and the next turn uses it. Nothing needs rebuilding, and the script holds no copy.
+The policy lives in [skills/model-preflight/SKILL.md](skills/model-preflight/SKILL.md), which is
+both the skill and the file the hook reads at runtime. Edit it and the next turn uses it. Nothing
+needs rebuilding, and neither hook script holds a copy.
 
 The tier table there is one person's mapping of task shapes to models. Yours will differ. Rewrite
 the `## Tiers` section and leave the rest, or rewrite all of it.
@@ -96,16 +112,17 @@ the `## Tiers` section and leave the rest, or rewrite all of it.
 To drive the hook from a file of your own instead, set `MODEL_PREFLIGHT_RULES` to its path. The
 full resolution order is:
 
-1. `$env:MODEL_PREFLIGHT_RULES`
+1. `$MODEL_PREFLIGHT_RULES`
 2. `$HOME/.agents/model-strategy.md`
 3. `$HOME/.codex/AGENTS.md`
 4. `$HOME/.claude/model-strategy.md`
-5. the copy bundled with this plugin
+5. the skill bundled with this plugin
 
 The first file that actually carries all three marker bullets wins. A candidate carrying none of
 them, or only some, is skipped rather than treated as a policy, so a global `AGENTS.md` written
 for something else costs nothing. If you already keep model guidance in one of these, the plugin
-picks it up with no configuration.
+picks it up with no configuration. The skill always carries the bundled policy, so on surfaces
+where only the skill loads, your own file does not reach the session.
 
 Three things in whatever file you point it at are a contract:
 
@@ -133,19 +150,31 @@ Run the hook directly and read what it would inject:
     ForEach-Object { $_.hookSpecificOutput.additionalContext }
 ```
 
-Point `-RulesPath` at a file that does not exist to confirm the NOTE appears. A check that cannot
+The POSIX port takes the same input, with the rules file as an optional first argument:
+
+```sh
+echo '{"session_id":"test"}' | sh ./scripts/add-model-preflight-context.sh
+```
+
+Point either at a rules file that does not exist to confirm the NOTE appears. A check that cannot
 fail proves nothing when it passes.
+
+`tests/Test-HookParity.ps1` runs both scripts against the same inputs and fails if their injected
+text differs by a character. CI runs it on Linux, macOS, and Windows.
 
 In a live session, the tell is a one-sentence verdict before the first tool call. No verdict means
 the hook is not firing.
 
 ## Codex caveats
 
-Two known issues, both worth checking rather than assuming:
+Codex skips a plugin's hooks until you review and trust the current hook definition, and a new
+plugin version counts as a new definition. After installing or updating, review and trust the hook
+in Codex, or no verdict will appear. Codex still reads the skill, but only when it judges it
+relevant.
 
-Plugin-bundled hooks do not fire in every Codex version. Some builds execute only the global hooks
-file. If no verdict appears in a Codex session after installing, add the hook to `~/.codex/hooks.json`
-yourself, using the absolute path to the installed script:
+Some Codex builds run only the global hooks file and ignore plugin hooks. If no verdict appears
+after trusting, add the hook to `~/.codex/hooks.json` yourself, using the absolute path to the
+installed plugin:
 
 ```json
 {
@@ -155,7 +184,7 @@ yourself, using the absolute path to the installed script:
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File \"<plugin-path>/scripts/Add-ModelPreflightContext.ps1\""
+            "command": "pwsh -NoProfile -File \"<plugin-path>/scripts/Add-ModelPreflightContext.ps1\" || sh \"<plugin-path>/scripts/add-model-preflight-context.sh\""
           }
         ]
       }

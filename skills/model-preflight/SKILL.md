@@ -1,12 +1,19 @@
-# Model Strategy
+---
+name: model-preflight
+description: Check whether the selected model and effort fit the task before starting it, state a one-sentence verdict, and pause for the user to switch when they do not. Use at the start of every new task, and again when a task grows into a different one, such as reaching a second repository, a second round of review findings, or a failure still unexplained after reading the code. Applies in claude.ai chat, Cowork, Claude Code, and Codex. Skip it when a model preflight block from this plugin's hook is already in the turn's context, because the hook carries this same policy.
+---
 
-The policy the preflight hook injects. Edit this file to change what the check recommends; the hook
-reads it at runtime and holds no copy of its own.
+# Model Preflight
 
-Three things here are a contract with the hook, and renaming any of them drops it from the injected
-text: the `## Tiers` heading, the `## Pause` heading, and the three `- **Escalate**:` /
-`- **Downshift**:` / `- **Re-check**:` bullets. A `###` subheading inside a section is fine.
-Everything else, including this paragraph, is yours to rewrite.
+Before starting a new task, compare the active model and effort with what the task warrants, state
+the verdict, and pause for a switch when they do not match. The Tiers, Triggers, and Pause sections
+below say how.
+
+Where the plugin's hook can run (Claude Code, Codex, and Cowork), it injects these sections into
+the turn and repeats the Re-check bullet between full injections. In claude.ai chat, plugin hooks do
+not run and this skill is the only carrier, so run the check yourself at each new task and at each
+Re-check moment. In chat and Cowork the user switches with the model menu and its effort or
+extended thinking control, with no `/model` command, so name those controls in the pause.
 
 Start from the active model and effort supplied by the harness, then adjust when the task warrants a
 different capability tier or reasoning level in either direction. A tier above what the task warrants
@@ -14,7 +21,7 @@ is as much a mismatch as one below it, because the quota is spent whether or not
 differ.
 
 One trigger list serves both tools. The tiers differ, so read the subsection for the tool you are
-running in and ignore the other.
+running in and ignore the other. claude.ai chat and Cowork use the Claude tiers.
 
 ## Tiers
 
@@ -169,3 +176,11 @@ Downshift bullet describes. Let a runtime assignment apply where the tool has on
 as that bullet says, without a model-switch prompt. Detect an assignment from the runtime definition
 rather than maintaining a command allowlist, and apply the normal preflight if the task expands
 beyond the routed workflow.
+
+## Editing This Policy
+
+The hook reads this file at runtime and holds no copy of its own, so an edit here takes effect on
+the next turn. Three things are a contract with the hook: the `## Tiers` heading, the `## Pause`
+heading, and the three `- **Escalate**:` / `- **Downshift**:` / `- **Re-check**:` bullets. Renaming
+a heading drops that section from the injected text; reshaping a bullet stops the file qualifying
+at all. A `###` subheading inside a section is fine, and everything else is yours to rewrite.

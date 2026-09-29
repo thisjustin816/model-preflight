@@ -1,11 +1,11 @@
 {
   "name": "model-preflight",
   "displayName": "Model Preflight",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Justin Beeson"
   },
-  "description": "Checks the session model and effort against the task before work starts, states the verdict where you can see it, and pauses for a switch when they do not match. Requires PowerShell 7 (pwsh) on PATH.",
+  "description": "Checks the session model and effort against the task before work starts, states the verdict where you can see it, and pauses for a switch when they do not match. Runs its hook on PowerShell 7 or POSIX sh, and carries the same policy as a skill for claude.ai chat.",
   "homepage": "https://github.com/thisjustin816/model-preflight",
   "repository": "https://github.com/thisjustin816/model-preflight",
   "license": "MIT",
