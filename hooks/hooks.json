@@ -1,11 +1,13 @@
 {
+  "description": "Model preflight: checks the session model and effort against each new task and pauses for a switch when they do not match",
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File \"${CLAUDE_PLUGIN_ROOT}/scripts/Add-ModelPreflightContext.ps1\" || sh \"${CLAUDE_PLUGIN_ROOT}/scripts/add-model-preflight-context.sh\""
+            "command": "pwsh -NoProfile -File \"${CLAUDE_PLUGIN_ROOT}/scripts/Add-ModelPreflightContext.ps1\" || sh \"${CLAUDE_PLUGIN_ROOT}/scripts/add-model-preflight-context.sh\"",
+            "statusMessage": "Checking model fit"
           }
         ]
       }

@@ -189,7 +189,8 @@ installed plugin:
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File \"<plugin-path>/scripts/Add-ModelPreflightContext.ps1\" || sh \"<plugin-path>/scripts/add-model-preflight-context.sh\""
+            "command": "pwsh -NoProfile -File \"<plugin-path>/scripts/Add-ModelPreflightContext.ps1\" || sh \"<plugin-path>/scripts/add-model-preflight-context.sh\"",
+            "statusMessage": "Checking model fit"
           }
         ]
       }
