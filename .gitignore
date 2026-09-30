@@ -1,0 +1,5 @@
+# OS metadata. Anthropic's directory validator refuses a plugin folder containing any of these.
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
