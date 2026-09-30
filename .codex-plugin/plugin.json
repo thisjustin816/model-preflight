@@ -1,6 +1,6 @@
 {
   "name": "model-preflight",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Checks the session model and reasoning effort against the task before work starts, states the verdict where you can see it, and pauses for a switch when they do not match. Runs its hook on PowerShell 7 or POSIX sh, and carries the same policy as a skill for claude.ai chat.",
   "skills": "./skills/",
   "keywords": ["model", "routing", "cost", "hooks", "reasoning"],
