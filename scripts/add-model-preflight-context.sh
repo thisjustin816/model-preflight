@@ -78,10 +78,11 @@ get_instruction_section() {
 
 hook_input=$(cat)
 if command -v python3 >/dev/null 2>&1; then
-    session_settings=$(printf '%s' "$hook_input" | python3 "$plugin_root/scripts/read-session-settings.py") || exit 1
-else
-    session_settings='Current model: unknown (python3 is required to decode hook metadata).
-Current reasoning effort: unknown (python3 is required to decode hook metadata).'
+    session_settings=$(printf '%s' "$hook_input" | python3 "$plugin_root/scripts/read-session-settings.py" 2>/dev/null) || session_settings=''
+fi
+if [ -z "$session_settings" ]; then
+    session_settings='Current model: unknown (python3 is unavailable or failed to decode hook metadata).
+Current reasoning effort: unknown (python3 is unavailable or failed to decode hook metadata).'
 fi
 session_id=$(
     printf '%s' "$hook_input" |
