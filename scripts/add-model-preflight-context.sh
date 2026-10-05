@@ -77,6 +77,7 @@ get_instruction_section() {
 }
 
 hook_input=$(cat)
+session_settings=''
 if command -v python3 >/dev/null 2>&1; then
     session_settings=$(printf '%s' "$hook_input" | python3 "$plugin_root/scripts/read-session-settings.py" 2>/dev/null) || session_settings=''
 fi

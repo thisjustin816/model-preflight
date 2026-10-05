@@ -118,5 +118,34 @@ class SessionSettingsTests(unittest.TestCase):
         self.assertIn('Current reasoning effort: unknown', self.contexts(self.input))
 
 
+class PosixSettingsFallbackTests(unittest.TestCase):
+    def context(self, setup):
+        shell = shutil.which('sh')
+        self.assertIsNotNone(shell, 'Install sh to verify the POSIX implementation')
+        with tempfile.TemporaryDirectory() as temp:
+            result = subprocess.run(
+                [shell, '-c', setup + '; . "$0"', str(ROOT / 'scripts/add-model-preflight-context.sh')],
+                input=json.dumps({'session_id': 'fallback-' + uuid.uuid4().hex}),
+                text=True, capture_output=True, check=True,
+                env=dict(os.environ, TMPDIR=temp),
+            )
+        context = json.loads(result.stdout)['hookSpecificOutput']['additionalContext']
+        self.assertIn('Current model: unknown', context)
+        self.assertIn('Current reasoning effort: unknown', context)
+        self.assertIn('## Tiers', context)
+        self.assertIn('## Pause', context)
+        return context
+
+    def test_missing_python_still_injects_policy(self):
+        self.context('command() { if [ "$1" = -v ] && [ "$2" = python3 ]; then return 1; fi; type "$2"; }')
+
+    def test_failed_reader_discards_partial_output(self):
+        context = self.context('python3() { cat >/dev/null; printf "PARTIAL_METADATA"; return 7; }')
+        self.assertNotIn('PARTIAL_METADATA', context)
+
+    def test_empty_reader_still_injects_policy(self):
+        self.context('python3() { cat >/dev/null; return 0; }')
+
+
 if __name__ == '__main__':
     unittest.main()
