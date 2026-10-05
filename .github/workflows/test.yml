@@ -17,3 +17,9 @@ jobs:
       - name: Compare the PowerShell hook with its POSIX port
         shell: pwsh
         run: ./tests/Test-HookParity.ps1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check current picker metadata
+        shell: pwsh
+        run: python tests/test_session_settings.py

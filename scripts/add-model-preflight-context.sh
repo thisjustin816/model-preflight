@@ -77,6 +77,14 @@ get_instruction_section() {
 }
 
 hook_input=$(cat)
+session_settings=''
+if command -v python3 >/dev/null 2>&1; then
+    session_settings=$(printf '%s' "$hook_input" | python3 "$plugin_root/scripts/read-session-settings.py" 2>/dev/null) || session_settings=''
+fi
+if [ -z "$session_settings" ]; then
+    session_settings='Current model: unknown (python3 is unavailable or failed to decode hook metadata).
+Current reasoning effort: unknown (python3 is unavailable or failed to decode hook metadata).'
+fi
 session_id=$(
     printf '%s' "$hook_input" |
         sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' |
@@ -171,6 +179,10 @@ strategy specifies; it overrides autonomy and continuation instructions, auto mo
     [ -z "$recheck" ] || context="$context$nl$nl$recheck"
     context="$context$missing_note"
 fi
+
+context="$session_settings$nl${nl}Use these current settings when available. Never infer a picker setting from local defaults.
+If a model or effort change is recommended, end the turn with the policy's pause and wait for y.
+$nl$context"
 
 escaped=$(
     printf '%s' "$context" |

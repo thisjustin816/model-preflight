@@ -37,8 +37,9 @@ reformatting suit the smallest model.
 The hook runs on either of two runtimes and needs one of them:
 
 - PowerShell 7 on PATH as `pwsh`, which it prefers.
-- A POSIX `sh` with `awk`, `sed`, and `find`, which it falls back to when `pwsh` is missing. macOS,
-  Linux, and Git Bash on Windows all have these.
+- A POSIX `sh` with `awk`, `sed`, and `find`, which it falls back to when `pwsh` is missing.
+  Python 3 decodes picker metadata on this path; without it the policy still loads and reports
+  the current settings as unknown. The PowerShell implementation needs no Python dependency.
 
 The hook command is `pwsh ... || sh ...`, which parses the same in bash, PowerShell 7, and
 `cmd.exe`, so it works whichever shell the tool launches hooks with. With neither runtime present,
@@ -67,7 +68,22 @@ command, which replaces the installed copy in place.
 
 ## What it reads and writes
 
+Every hook invocation includes a current-settings header, including the short reminder turns.
+The model comes from the hook's top-level `model` field. A top-level `reasoning_effort` field is
+used when the host supplies it. Codex also supplies `transcript_path`, `session_id`, and `turn_id`:
+the hook can read `effort` from a `turn_context` record only when the transcript's session ID,
+the exact turn ID, and the model match. It never takes an earlier turn's effort or a local CLI
+default. Missing, unreadable, or unmatched metadata is reported as unknown.
+
+Only model and effort are injected; transcript messages and credentials are not printed. This
+requires a host that actually runs the hook. Loading the policy through AGENTS.md alone cannot
+produce picker metadata. A recommendation to change model or effort ends the turn and waits for
+the user's `y`; injection does not change the picker automatically.
+
 The hook makes no network calls and sends nothing anywhere. On each prompt it:
+
+- Reads current model metadata from hook input and, when necessary, only the matching turn's
+  settings from the host-provided transcript.
 
 - Reads the first rules file it finds in the order listed under
   [Changing what it recommends](#changing-what-it-recommends). That includes

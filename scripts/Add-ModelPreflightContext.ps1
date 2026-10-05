@@ -107,6 +107,7 @@ process {
     $hookInput = [Console]::In.ReadToEnd()
 
     $sessionId = 'unknown'
+    $parsedInput = $null
     try {
         $parsedInput = $hookInput | ConvertFrom-Json -ErrorAction Stop
         if ($parsedInput.session_id) {
@@ -116,6 +117,61 @@ process {
     catch {
         Write-Debug "Hook input parse failed: $_"
     }
+
+    $model = $null
+    $effort = $null
+    $modelSource = 'hook input'
+    $effortSource = 'hook input'
+    $validEfforts = @('none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra')
+    if ($parsedInput.model -is [String] -and $parsedInput.model -cmatch '^[A-Za-z0-9._:-]{1,200}\z') {
+        $model = $parsedInput.model
+    }
+    if ($parsedInput.reasoning_effort -is [String] -and $parsedInput.reasoning_effort -cin $validEfforts) {
+        $effort = $parsedInput.reasoning_effort
+    }
+    if (-not $effort -and $parsedInput.transcript_path -is [String] -and
+        $parsedInput.session_id -is [String] -and $parsedInput.session_id -and
+        $parsedInput.turn_id -is [String] -and $parsedInput.turn_id) {
+        $identity = $null
+        $current = $null
+        try {
+            Get-Content -LiteralPath $parsedInput.transcript_path -ErrorAction Stop | ForEach-Object {
+                try {
+                    $record = $_ | ConvertFrom-Json -ErrorAction Stop
+                    if ($record.type -ceq 'session_meta') {
+                        $identity = $record.payload.id
+                    }
+                    elseif ($record.type -ceq 'turn_context' -and
+                        $record.payload.turn_id -ceq $parsedInput.turn_id) {
+                        $current = $record.payload
+                    }
+                }
+                catch {
+                    Write-Debug 'Ignoring an invalid transcript record.'
+                }
+            }
+            if ($identity -ceq $parsedInput.session_id -and $current.model -is [String] -and
+                $current.model -cmatch '^[A-Za-z0-9._:-]{1,200}\z' -and
+                (-not $model -or $model -ceq $current.model)) {
+                if (-not $model) {
+                    $model = $current.model
+                    $modelSource = 'matching transcript turn'
+                }
+                if ($current.effort -is [String] -and $current.effort -cin $validEfforts) {
+                    $effort = $current.effort
+                    $effortSource = 'matching transcript turn'
+                }
+            }
+        }
+        catch {
+            Write-Debug 'Current transcript metadata is unavailable.'
+        }
+    }
+    $modelLine = $model ? "Current model: $model ($modelSource)." :
+        'Current model: unknown (not supplied by this hook invocation).'
+    $effortLine = $effort ? "Current reasoning effort: $effort ($effortSource)." :
+        'Current reasoning effort: unknown (no matching current-turn metadata).'
+    $sessionSettings = "$modelLine`n$effortLine"
 
     # $env:TEMP exists only on Windows; GetTempPath is the cross-platform fallback and takes no
     # provider path, so it is safe where a [System.IO.Path] call taking one would not be.
@@ -222,6 +278,13 @@ strategy specifies; it overrides autonomy and continuation instructions, auto mo
 '@ + ($recheck ? "`n`n$recheck" : '') + $missingNote
         )
     }
+
+    $additionalContext = (
+        "$sessionSettings`n`n" +
+        "Use these current settings when available. Never infer a picker setting from local defaults.`n" +
+        "If a model or effort change is recommended, end the turn with the policy's pause and wait for y.`n`n" +
+        $additionalContext
+    )
 
     @{
         hookSpecificOutput = @{
