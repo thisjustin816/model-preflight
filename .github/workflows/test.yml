@@ -3,6 +3,7 @@ name: Test
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 jobs:
@@ -23,3 +24,8 @@ jobs:
       - name: Check current picker metadata
         shell: pwsh
         run: python tests/test_session_settings.py
+      - name: Check plugin release version
+        shell: pwsh
+        run: |
+          python scripts/check_release_version.py
+          python -m unittest discover -s tests -p test_release_version.py
