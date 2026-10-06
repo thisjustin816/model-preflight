@@ -66,6 +66,28 @@ Start a new session afterward. A plugin installed mid-session does not load into
 To update, run `claude plugin update model-preflight@thisjustin816`, or re-run the Codex add
 command, which replaces the installed copy in place.
 
+## Releases
+
+The Claude and Codex plugin manifests carry the same `MAJOR.MINOR.PATCH` version. Versions follow
+[Semantic Versioning](https://semver.org/); the `0.x` series is still in initial development. A
+release is an annotated `vMAJOR.MINOR.PATCH` tag on the tested `main` commit. Published tags do not
+move.
+
+For each release, update both manifests in the pull request and run
+`python scripts/check_release_version.py` with the test suite. After the change reaches `main`,
+tag that commit and push the tag:
+
+```sh
+git tag -a vX.Y.Z -m "Model Preflight X.Y.Z"
+git push origin vX.Y.Z
+```
+
+Replace `X.Y.Z` with the version in the manifests. The tag is created only after the pull request
+is merged, so it points to the commit users install.
+
+The tag build checks that its name matches both manifests. Marketplace entries that pin a commit
+can move to the tagged commit after its changes are reviewed.
+
 ## What it reads and writes
 
 Every hook invocation includes a current-settings header, including the short reminder turns.
