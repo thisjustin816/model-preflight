@@ -13,7 +13,7 @@ set -u
 
 # Without these the output is an empty context that still parses, so a missing tool would pass for a
 # working hook. Exiting non-zero makes the tool report the hook as failed instead.
-for required_tool in awk sed find head tr dirname cat; do
+for required_tool in awk sed find head tr dirname cat wc; do
     if ! command -v "$required_tool" >/dev/null 2>&1; then
         echo "model-preflight: $required_tool not found on PATH" >&2
         exit 1
@@ -128,11 +128,20 @@ downshift=''
 recheck=''
 tiers=''
 pause=''
+rules_source=''
 for candidate in "$@"; do
     [ -n "$candidate" ] || continue
     candidate_list="${candidate_list:+$candidate_list, }$candidate"
     [ -z "$recheck" ] || continue
     [ -f "$candidate" ] && [ -r "$candidate" ] || continue
+    if command -v cygpath >/dev/null 2>&1; then
+        candidate_source=$(cygpath -am -- "$candidate") || continue
+    else
+        candidate_source=$(
+            CDPATH='' cd -- "$(dirname -- "$candidate")" &&
+                printf '%s/%s' "$PWD" "${candidate##*/}"
+        ) || continue
+    fi
     candidate_escalate=$(get_trigger_line "$candidate" 'Escalate')
     candidate_downshift=$(get_trigger_line "$candidate" 'Downshift')
     candidate_recheck=$(get_trigger_line "$candidate" 'Re-check')
@@ -143,6 +152,7 @@ for candidate in "$@"; do
         recheck=$candidate_recheck
         tiers=$(get_instruction_section "$candidate" 'Tiers')
         pause=$(get_instruction_section "$candidate" 'Pause')
+        rules_source=$candidate_source
     fi
 done
 
@@ -183,6 +193,26 @@ fi
 context="$session_settings$nl${nl}Use these current settings when available. Never infer a picker setting from local defaults.
 If a model or effort change is recommended, end the turn with the policy's pause and wait for y.
 $nl$context"
+
+context_bytes=$(printf '%s' "$context" | wc -c)
+if [ "$context_bytes" -gt 2000 ]; then
+    if [ -n "$rules_source" ]; then
+        context="$session_settings$nl${nl}Model preflight: read the policy at $rules_source before choosing a model or starting work.
+This policy read is the only bootstrap tool action allowed before the verdict.
+Apply only its Escalate, Downshift, Re-check bullets and ## Tiers and ## Pause sections.
+Then state the verdict. A recommended change must end the turn and wait for y.
+Use current settings when known; never infer them from local defaults.
+If the policy cannot be read, report that preflight could not load. Do not claim it ran."
+    else
+        context="$session_settings$nl${nl}NOTE: no complete model strategy could be read. Preflight could not load.
+Restore the Escalate, Downshift and Re-check bullets or point MODEL_PREFLIGHT_RULES at valid rules."
+    fi
+    context_bytes=$(printf '%s' "$context" | wc -c)
+    if [ "$context_bytes" -gt 2000 ]; then
+        context="$session_settings$nl${nl}NOTE: selected policy path is too long for the hook context budget.
+Preflight could not load; shorten the rules path."
+    fi
+fi
 
 escaped=$(
     printf '%s' "$context" |
