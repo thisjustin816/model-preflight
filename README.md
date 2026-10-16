@@ -14,18 +14,35 @@ waits for you rather than proceeding on the assumption you would have agreed.
 
 ## Where it runs
 
-The plugin carries the policy two ways: a `UserPromptSubmit` hook that injects it into every turn,
-and a skill holding the same text for surfaces that do not run hooks.
+The plugin carries the policy two ways: a `UserPromptSubmit` hook on hosts that can run it,
+and a skill holding the same policy for other surfaces.
 
-| Surface | What loads | How reliable |
+The policy has separate routes for Claude, OpenAI agent surfaces (Codex and ChatGPT Work), and
+ordinary ChatGPT Chat. Work shares the agent tier mapping and uses its native GUI controls. Chat
+uses only choices established in its own picker; it does not inherit Sol or Luna recommendations.
+If a concrete Chat recommendation needs unknown picker details, preflight asks once and waits
+before task work. Once a supported choice is known, the usual single-choice switch pause applies.
+
+| Surface | Policy carrier | Delivery limits |
 | :- | :- | :- |
-| Claude Code | Hook and skill | Every turn, from the hook |
-| Codex | Hook and skill | Every turn, once you trust the hook (see [Codex caveats](#codex-caveats)) |
-| Cowork | Hook and skill | Every turn where the hook's shell tools exist; the skill otherwise |
-| claude.ai chat | Skill only | Best effort: Claude applies a skill when it judges one relevant, so a task can start without the check |
+| Claude Code | Plugin hook and skill | Hook needs the scripts and shell prerequisites in its execution environment |
+| Claude Cowork | Plugin hook and skill | Hook needs those same prerequisites; use the skill where they are absent |
+| Claude chat on web or Desktop | Plugin skill | Plugin hooks and subagents do not run in chat |
+| Local Codex CLI or desktop | Trusted plugin hook and skill | Both orchestration and execution must support local hooks |
+| Local ChatGPT Work | Trusted plugin hook and skill | Requires local orchestration, available scripts, and shell prerequisites |
+| Hosted or cloud-orchestrated Work | Plugin skill | Plugin command hooks do not run, even when tools execute locally |
+| ChatGPT Chat | Plugin skill | Work/Codex command-hook assumptions do not apply |
+| Codex IDE extension | Separately installed filesystem skill | Plugins are unsupported; marketplace installation does not install this fallback |
 
-In chat and Cowork the pause names the model menu and its effort or extended thinking control,
-since there is no `/model` command there.
+These are carrier capabilities, not a guarantee that the model follows the instructions. A skill
+can be selected explicitly; automatic relevance selection can miss it. A hook can deliver context
+that the model fails to apply. Provider references: [Claude plugins](https://support.claude.com/en/articles/13837440-use-plugins-in-claude),
+[OpenAI plugin surfaces](https://learn.chatgpt.com/docs/plugins), and
+[cloud hook limits](https://learn.chatgpt.com/docs/hooks).
+
+In Claude chat and Cowork the pause names the native model menu and the effort or extended thinking
+controls it exposes, since there is no `/model` command there. OpenAI GUI routes use their native
+controls. Each route omits controls that the selected model fixes or does not offer.
 
 The triggers cover everyday chat as well as code. Summaries, drafting, explanations, and everyday
 advice stay on the default tier. Medical, legal, financial, or safety questions, research that has
@@ -37,7 +54,8 @@ reformatting suit the smallest model.
 The hook runs on either of two runtimes and needs one of them:
 
 - PowerShell 7 on PATH as `pwsh`, which it prefers.
-- A POSIX `sh` with `awk`, `sed`, and `find`, which it falls back to when `pwsh` is missing.
+- A POSIX `sh` with standard utilities including `awk`, `sed`, `find`, and `wc`, which it falls back
+  to when `pwsh` is missing.
   Python 3 decodes picker metadata on this path; without it the policy still loads and reports
   the current settings as unknown. The PowerShell implementation needs no Python dependency.
 
@@ -47,24 +65,53 @@ the tool reports a failed hook command on every prompt. The skill needs nothing.
 
 ## Install
 
-Claude Code:
+### Claude Code
 
 ```powershell
 claude plugin marketplace add thisjustin816/model-preflight
 claude plugin install model-preflight@thisjustin816
 ```
 
-Codex:
+### Local Codex CLI or desktop
 
 ```powershell
 codex plugin marketplace add https://github.com/thisjustin816/model-preflight
 codex plugin add model-preflight@thisjustin816
 ```
 
-Start a new session afterward. A plugin installed mid-session does not load into it.
+The CLI also provides a `/plugins` browser. Start a new local session after installing or updating
+so it loads the intended plugin version, then review and trust its hook where required.
 
 To update, run `claude plugin update model-preflight@thisjustin816`, or re-run the Codex add
 command, which replaces the installed copy in place.
+
+### Claude chat and Cowork
+
+Open Customize, then Plugins. Add this repository as a marketplace using
+`https://github.com/thisjustin816/model-preflight`, and install Model Preflight from it. Account
+plugins follow the signed-in account; supported Claude Code versions can sync them at startup.
+API-key and cloud-provider sessions use their own installation path. Select the skill through
+the `/` or `+` menu in chat or Cowork when you want to ensure it is loaded. See the
+[Claude installation guide](https://support.claude.com/en/articles/13837440-use-plugins-in-claude)
+for account, client-version, and organization restrictions.
+
+### ChatGPT Chat and Work
+
+Use the native Plugins tab to install an entry available to your account or workspace, start a
+new chat, and select Model Preflight's skill with `@` or ask to use it. This repository's local
+marketplace commands do not publish it to the universal directory or install it into a hosted
+workspace. Repository-marketplace distribution varies by surface; use the source your workspace
+or account exposes. See the [plugin installation guide](https://learn.chatgpt.com/docs/plugins)
+and [packaging and distribution guide](https://developers.openai.com/plugins/build/plugins).
+
+Web installation does not place shell scripts in an execution environment. Hosted Work uses the
+skill for this plugin's preflight; a web install cannot enable its command hook. See the
+[script deployment and trust requirements](https://developers.openai.com/plugins/build/plugins)
+and [cloud-orchestration restrictions](https://learn.chatgpt.com/docs/hooks).
+
+The IDE extension needs a separately installed filesystem skill to use this policy. Follow its
+[skill discovery instructions](https://learn.chatgpt.com/docs/build-skills); plugin support
+in the CLI or desktop app does not establish plugin support in the IDE.
 
 ## Releases
 
@@ -91,18 +138,27 @@ can move to the tagged commit after its changes are reviewed.
 ## What it reads and writes
 
 Every hook invocation includes a current-settings header, including the short reminder turns.
-The model comes from the hook's top-level `model` field. A top-level `reasoning_effort` field is
-used when the host supplies it. Codex also supplies `transcript_path`, `session_id`, and `turn_id`:
-the hook can read `effort` from a `turn_context` record only when the transcript's session ID,
-the exact turn ID, and the model match. It never takes an earlier turn's effort or a local CLI
-default. Missing, unreadable, or unmatched metadata is reported as unknown.
+The hook accepts top-level `model` and `reasoning_effort` fields when the host supplies them.
+Codex can also supply `transcript_path`, `session_id`, and `turn_id`. When effort is missing,
+the reader can recover it from a Codex `turn_context` record only when the session ID and exact
+turn ID match, and the recorded model agrees with any model supplied by the hook. It can also
+recover a missing model while reading that matching record. It never takes an earlier turn's
+setting or a local CLI default. Missing, unreadable, or unmatched metadata is reported as unknown.
+
+Claude Code's `UserPromptSubmit` schema does not supply the same active model and effort fields.
+Its model field belongs to `SessionStart`, while its effort object is documented for tool-context
+events. This plugin does not track those events or reconstruct current Claude picker settings
+from earlier session records. A Claude prompt can therefore load preflight successfully while
+its header reports unknown model and effort. See the [Claude hook input contract](https://code.claude.com/docs/en/hooks).
+On a surface that only loads the skill, no hook metadata header is produced. Unknown metadata
+does not establish a mismatch or prove which models are selectable.
 
 Only model and effort are injected; transcript messages and credentials are not printed. This
 requires a host that actually runs the hook. Loading the policy through AGENTS.md alone cannot
 produce picker metadata. A recommendation to change model or effort ends the turn and waits for
 the user's `y`; injection does not change the picker automatically.
 
-The hook does not enumerate available models. The bundled Codex policy prefers GPT-6.1 Sol only
+The hook does not enumerate available models. The Work/Codex policy prefers GPT-6.1 Sol only
 when the host reports it as active or the user confirms it is selectable in their current account,
 workspace, and surface's native picker. Unknown or unavailable 6.1 access uses GPT-6 Sol, without
 repeated availability prompts. A release announcement, configured default, or cached model catalog
@@ -142,8 +198,17 @@ for your `y`, because a suggestion the model keeps working past arrives too late
 
 ## What it injects
 
-On the first turn of a session and every fifth turn after, the full block: the trigger list, the
-tier table, and the pause format. Between those, a short reminder carrying the Re-check line alone.
+On the first turn of a session and every fifth turn after, the hook prepares the trigger list, tier
+table, and pause format. Between those, it prepares a short reminder carrying the Re-check line.
+Every message, including its metadata, is limited to 2,000 UTF-8 bytes to stay below host output
+limits even for multibyte text.
+
+When the prepared message exceeds that budget, the hook sends the selected policy's absolute path
+and explicitly directs the model to read it before the verdict or other work. That policy read is
+the only bootstrap exception to the rule requiring a verdict before tool calls. The model applies
+only the three trigger bullets and the `## Tiers` and `## Pause` sections. If it cannot read the
+file, it reports that preflight could not load. A path too long to fit produces a bounded failure
+note; missing-policy diagnostics are also kept within the budget.
 
 The cadence exists because the failure this guards against is not forgetting the rule at the start
 of a session. It is a task growing into a different task around turn 12, long after the opening
@@ -152,6 +217,12 @@ part that matters mid-session.
 
 ## Changing what it recommends
 
+To refresh recommendations from current model information, follow the
+[model policy maintenance procedure](docs/model-policy-maintenance.md). Use it for each model
+release or control change that could affect the policy, and when asked to review the latest
+guidance. It covers both vendors, separates product availability from account access, and records
+why each switching criterion changes or stays the same.
+
 The policy lives in [skills/model-preflight/SKILL.md](skills/model-preflight/SKILL.md), which is
 both the skill and the file the hook reads at runtime. Edit it and the next turn uses it. Nothing
 needs rebuilding, and neither hook script holds a copy.
@@ -159,14 +230,14 @@ needs rebuilding, and neither hook script holds a copy.
 The tier table there is one person's mapping of task shapes to models. Yours will differ. Rewrite
 the `## Tiers` section and leave the rest, or rewrite all of it.
 
-When access is established, GPT-6.1 Sol is preferred within the Sol tier for repeated, long-running
-work across code, apps, and documents. Code cleanup, flaky-test fixes, and CI improvements are useful
-examples. Medium remains the starting effort for normal work; existing escalation triggers raise
+In Work and Codex, when access is established, GPT-6.1 Sol is preferred within the Sol tier for
+repeated, long-running work across code, apps, and documents. Code cleanup, flaky-test fixes, and
+CI improvements are useful examples. Medium remains the starting effort for normal work; existing escalation triggers raise
 it to high or extra high, and the top-tier cases still use Astra. An existing 6 Sol session can
 finish a small task when switching would cost more than it saves. See the official
 [model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
 [software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
-Use the effort levels exposed by the current Codex picker; API controls can differ.
+Use the effort levels exposed by the current Work or Codex picker; API controls can differ.
 
 To drive the hook from a file of your own instead, set `MODEL_PREFLIGHT_RULES` to its path. The
 full resolution order is:
@@ -221,19 +292,24 @@ fail proves nothing when it passes.
 `tests/Test-HookParity.ps1` runs both scripts against the same inputs and fails if their injected
 text differs by a character. CI runs it on Linux, macOS, and Windows.
 
-In a live session, the tell is a one-sentence verdict before the first tool call. No verdict means
-the hook is not firing.
+In a live session, look for a one-sentence verdict before task work, or the Chat route's picker
+question when a concrete recommendation needs it. On hook-enabled surfaces, confirm in the host's
+hook diagnostics that the enabled, trusted hook ran and delivered its context. An oversized policy
+reference also requires the model to read the selected file before the verdict.
+
+If context arrived but the model omitted preflight, delivery worked and compliance failed. If
+the hook did not run, check registration, trust, execution support, and shell prerequisites. On
+skill-only surfaces, select the skill explicitly and confirm it loaded. A visible verdict alone
+does not prove a hook ran, and a missing verdict alone does not identify the failure.
 
 ## Codex caveats
 
-Codex skips a plugin's hooks until you review and trust the current hook definition, and a new
-plugin version counts as a new definition. After installing or updating, review and trust the hook
-in Codex, or no verdict will appear. Codex still reads the skill, but only when it judges it
-relevant.
+On supported local Codex hosts, plugin hooks need trust for their current definition. After an
+install or update, check registration and trust before relying on hook delivery. The skill can
+still produce a verdict without the hook. See the [hook trust contract](https://developers.openai.com/plugins/build/plugins).
 
-Some Codex builds run only the global hooks file and ignore plugin hooks. If no verdict appears
-after trusting, add the hook to `~/.codex/hooks.json` yourself, using the absolute path to the
-installed plugin:
+For a local Codex build confirmed to read only the global hooks file and ignore plugin hooks,
+register the hook in `~/.codex/hooks.json` using the absolute path to the installed plugin:
 
 ```json
 {

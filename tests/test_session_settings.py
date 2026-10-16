@@ -19,13 +19,16 @@ class SessionSettingsTests(unittest.TestCase):
         self.session = 'settings-' + uuid.uuid4().hex
         self.input = {'session_id': self.session, 'turn_id': 'current', 'model': 'gpt-6-sol'}
 
-    def contexts(self, data, turn=1):
+    def contexts(self, data, turn=1, rules=None):
         shell = shutil.which('sh')
         self.assertIsNotNone(shell, 'Install sh to verify the POSIX implementation')
         commands = [[shell, str(ROOT / 'scripts/add-model-preflight-context.sh')]]
         pwsh = shutil.which('pwsh')
         self.assertIsNotNone(pwsh, 'Install pwsh to verify both implementations')
         commands.append([pwsh, '-NoProfile', '-File', str(ROOT / 'scripts/Add-ModelPreflightContext.ps1')])
+        if rules is not None:
+            commands[0].append(str(rules))
+            commands[1].extend(['-RulesPath', str(rules)])
         outputs = []
         for command in commands:
             payload = dict(data, session_id=self.session)
@@ -37,11 +40,98 @@ class SessionSettingsTests(unittest.TestCase):
             if turn == 2:
                 counter.parent.mkdir(parents=True, exist_ok=True)
                 counter.write_text('1\n')
-            result = subprocess.run(command, input=json.dumps(payload), text=True,
-                                    capture_output=True, check=True, env=env)
+            result = subprocess.run(command, input=json.dumps(payload), encoding='utf-8',
+                                    capture_output=True, check=True, env=env, cwd=ROOT)
             outputs.append(json.loads(result.stdout)['hookSpecificOutput']['additionalContext'])
         self.assertEqual(outputs[0], outputs[1])
+        self.assertLessEqual(len(outputs[0].encode('utf-8')), 2000)
         return outputs[0]
+
+    def policy(self, *, tiers='SMALL_TIER', recheck='Check again.', name='chosen rules [approved].md'):
+        path = Path(self.temp.name) / name
+        path.write_text(
+            '- **Escalate**: Raise effort.\n'
+            '- **Downshift**: Reduce effort.\n'
+            f'- **Re-check**: {recheck}\n\n'
+            f'## Tiers\n\n{tiers}\n\n'
+            '## Pause\n\nWait for y.\n', encoding='utf-8',
+        )
+        return path
+
+    def test_large_selected_policy_loads_exact_source(self):
+        rules = self.policy(tiers='LARGE_POLICY_SENTINEL ' * 1000, name='selected.md')
+        context = self.contexts(dict(self.input, reasoning_effort='high'), rules=rules.as_posix())
+        self.assertIn(rules.as_posix(), context)
+        self.assertIn('read the policy', context)
+        self.assertIn('only bootstrap tool action', context)
+        self.assertIn('## Tiers', context)
+        self.assertIn('## Pause', context)
+        self.assertIn('Current model: gpt-6-sol (hook input).', context)
+        self.assertIn('Current reasoning effort: high (hook input).', context)
+        self.assertNotIn('LARGE_POLICY_SENTINEL', context)
+
+    def test_small_selected_policy_stays_inline(self):
+        context = self.contexts(self.input, rules=self.policy().as_posix())
+        self.assertIn('SMALL_TIER', context)
+        self.assertIn('Wait for y.', context)
+        self.assertNotIn('read the policy', context)
+
+    def test_relative_selected_policy_uses_absolute_reference(self):
+        rules = self.policy(tiers='RELATIVE_POLICY ' * 1000)
+        relative = Path(os.path.relpath(rules, ROOT)).as_posix()
+        context = self.contexts(self.input, rules=relative)
+        self.assertIn(rules.as_posix(), context)
+        self.assertNotIn(relative, context)
+
+    def test_policy_budget_counts_utf8_bytes(self):
+        rules = self.policy(tiers='\u754c' * 350)
+        context = self.contexts(self.input, rules=rules.as_posix())
+        self.assertIn('read the policy', context)
+        self.assertNotIn('\u754c', context)
+
+    def test_oversized_reminder_loads_selected_policy(self):
+        rules = self.policy(recheck='RECHECK_SENTINEL ' * 1000)
+        context = self.contexts(self.input, turn=2, rules=rules.as_posix())
+        self.assertIn(rules.as_posix(), context)
+        self.assertIn('read the policy', context)
+        self.assertNotIn('RECHECK_SENTINEL', context)
+
+    def test_missing_policy_keeps_failure_note(self):
+        missing = Path(self.temp.name) / 'missing.md'
+        context = self.contexts(self.input, rules=missing.as_posix())
+        self.assertIn('NOTE: no complete model strategy could be read', context)
+        self.assertNotIn('read the policy', context)
+
+    def test_partial_policy_keeps_failure_note(self):
+        partial = Path(self.temp.name) / 'partial.md'
+        partial.write_text('- **Escalate**: Raise effort.\n', encoding='utf-8')
+        context = self.contexts(self.input, rules=partial.as_posix())
+        self.assertIn('NOTE: no complete model strategy could be read', context)
+        self.assertNotIn('read the policy', context)
+
+    def test_long_missing_policy_path_has_bounded_failure_note(self):
+        missing = Path(self.temp.name) / ('x' * 3000 + '.md')
+        context = self.contexts(self.input, rules=missing.as_posix())
+        self.assertIn('NOTE: no complete model strategy could be read', context)
+        self.assertIn('Preflight could not load', context)
+        self.assertNotIn('x' * 3000, context)
+
+    def test_long_selected_policy_path_has_bounded_failure_note(self):
+        folder = Path(self.temp.name)
+        for _ in range(9):
+            folder /= 'p' * 180
+        if hasattr(os, 'pathconf'):
+            path_limit = os.pathconf(self.temp.name, 'PC_PATH_MAX')
+            if 0 < path_limit <= len(os.fsencode(folder / 'rules.md')):
+                self.skipTest('Host path limit prevents an oversized policy reference')
+        folder.mkdir(parents=True)
+        rules = folder / 'rules.md'
+        rules.write_text(self.policy(tiers='LONG_PATH_POLICY ' * 1000).read_text(encoding='utf-8'),
+                         encoding='utf-8')
+        context = self.contexts(self.input, rules=rules.as_posix())
+        self.assertIn('NOTE: selected policy path is too long', context)
+        self.assertIn('Preflight could not load', context)
+        self.assertNotIn(rules.as_posix(), context)
 
     def rollout(self, *, turn='current', model='gpt-6-sol', effort='high', session=None):
         records = [
@@ -134,16 +224,19 @@ class PosixSettingsFallbackTests(unittest.TestCase):
         self.assertIn('Current reasoning effort: unknown', context)
         self.assertIn('## Tiers', context)
         self.assertIn('## Pause', context)
+        self.assertIn('read the policy', context)
+        self.assertIn((ROOT / 'skills/model-preflight/SKILL.md').as_posix(), context)
+        self.assertLessEqual(len(context.encode('utf-8')), 2000)
         return context
 
-    def test_missing_python_still_injects_policy(self):
+    def test_missing_python_still_references_policy(self):
         self.context('command() { if [ "$1" = -v ] && [ "$2" = python3 ]; then return 1; fi; type "$2"; }')
 
     def test_failed_reader_discards_partial_output(self):
         context = self.context('python3() { cat >/dev/null; printf "PARTIAL_METADATA"; return 7; }')
         self.assertNotIn('PARTIAL_METADATA', context)
 
-    def test_empty_reader_still_injects_policy(self):
+    def test_empty_reader_still_references_policy(self):
         self.context('python3() { cat >/dev/null; return 0; }')
 
 

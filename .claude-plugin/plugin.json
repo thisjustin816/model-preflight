@@ -5,7 +5,7 @@
   "author": {
     "name": "Justin Beeson"
   },
-  "description": "Checks the session model and effort against the task before work starts, states the verdict where you can see it, and pauses for a switch when they do not match. Runs its hook on PowerShell 7 or POSIX sh, and carries the same policy as a skill for claude.ai chat.",
+  "description": "Checks model and effort fit before work, states a verdict, and pauses for a switch when needed. Maps tasks separately for Claude, Codex and ChatGPT Work, and ChatGPT Chat. Uses a PowerShell 7 or POSIX sh hook on supported hosts and a skill where hooks do not run.",
   "homepage": "https://github.com/thisjustin816/model-preflight",
   "repository": "https://github.com/thisjustin816/model-preflight",
   "license": "MIT",

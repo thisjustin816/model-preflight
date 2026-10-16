@@ -11,8 +11,8 @@
     serves both.
 
     The full block goes out on the first turn and every fifth turn after; a shorter reminder goes
-    between. The reminder carries the Re-check bullet, because a task that grows mid-session is the
-    case a per-task check misses.
+    between. Context over 2,000 UTF-8 bytes becomes a reference to the selected rules file, which the
+    model must read before applying preflight. A reference that cannot fit produces a failure note.
 
     add-model-preflight-context.sh beside this script is a POSIX port for hosts without pwsh. The
     two must produce the same additionalContext, which tests/Test-HookParity.ps1 checks.
@@ -208,9 +208,11 @@ process {
     $recheck = $null
     $tiers = $null
     $pause = $null
+    $rulesSource = $null
     foreach ($candidate in $candidatePaths) {
         try {
-            $ruleLines = Get-Content $candidate
+            $candidateSource = Convert-Path -LiteralPath $candidate
+            $ruleLines = Get-Content -LiteralPath $candidate
         }
         catch {
             Write-Debug "Could not read ${candidate}: $_"
@@ -230,6 +232,7 @@ process {
         $recheck = $candidateRecheck
         $tiers = Get-InstructionSection -Lines $ruleLines -Heading 'Tiers'
         $pause = Get-InstructionSection -Lines $ruleLines -Heading 'Pause'
+        $rulesSource = $IsWindows ? $candidateSource.Replace('\', '/') : $candidateSource
         break
     }
 
@@ -285,6 +288,33 @@ strategy specifies; it overrides autonomy and continuation instructions, auto mo
         "If a model or effort change is recommended, end the turn with the policy's pause and wait for y.`n`n" +
         $additionalContext
     )
+
+    $utf8 = [Text.Encoding]::UTF8
+    if ($utf8.GetByteCount($additionalContext) -gt 2000) {
+        $additionalContext = if ($rulesSource) {
+            (
+                "$sessionSettings`n`n" +
+                "Model preflight: read the policy at $rulesSource before choosing a model or starting work.`n" +
+                "This policy read is the only bootstrap tool action allowed before the verdict.`n" +
+                "Apply only its Escalate, Downshift, Re-check bullets and ## Tiers and ## Pause sections.`n" +
+                "Then state the verdict. A recommended change must end the turn and wait for y.`n" +
+                "Use current settings when known; never infer them from local defaults.`n" +
+                'If the policy cannot be read, report that preflight could not load. Do not claim it ran.'
+            )
+        }
+        else {
+            (
+                "$sessionSettings`n`nNOTE: no complete model strategy could be read. Preflight could not load.`n" +
+                'Restore the Escalate, Downshift and Re-check bullets or point MODEL_PREFLIGHT_RULES at valid rules.'
+            )
+        }
+        if ($utf8.GetByteCount($additionalContext) -gt 2000) {
+            $additionalContext = (
+                "$sessionSettings`n`nNOTE: selected policy path is too long for the hook context budget.`n" +
+                'Preflight could not load; shorten the rules path.'
+            )
+        }
+    }
 
     @{
         hookSpecificOutput = @{
