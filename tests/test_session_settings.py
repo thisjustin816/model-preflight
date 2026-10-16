@@ -77,11 +77,13 @@ class SessionSettingsTests(unittest.TestCase):
         self.assertNotIn('read the policy', context)
 
     def test_relative_selected_policy_uses_absolute_reference(self):
-        rules = self.policy(tiers='RELATIVE_POLICY ' * 1000)
-        relative = Path(os.path.relpath(rules, ROOT)).as_posix()
-        context = self.contexts(self.input, rules=relative)
-        self.assertIn(rules.as_posix(), context)
-        self.assertNotIn(relative, context)
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            rules = Path(directory) / 'chosen rules [approved].md'
+            shutil.copyfile(self.policy(tiers='RELATIVE_POLICY ' * 1000), rules)
+            relative = rules.relative_to(ROOT).as_posix()
+            context = self.contexts(self.input, rules=relative)
+            self.assertIn(rules.as_posix(), context)
+            self.assertNotIn(f'read the policy at {relative} ', context)
 
     def test_policy_budget_counts_utf8_bytes(self):
         rules = self.policy(tiers='\u754c' * 350)
