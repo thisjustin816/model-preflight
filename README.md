@@ -102,6 +102,13 @@ requires a host that actually runs the hook. Loading the policy through AGENTS.m
 produce picker metadata. A recommendation to change model or effort ends the turn and waits for
 the user's `y`; injection does not change the picker automatically.
 
+The hook does not enumerate available models. The bundled Codex policy prefers GPT-6.1 Sol only
+when the host reports it as active or the user confirms it is selectable in their current account,
+workspace, and surface's native picker. Unknown or unavailable 6.1 access uses GPT-6 Sol, without
+repeated availability prompts. A release announcement, configured default, or cached model catalog
+does not establish access. Confirmation expires when the account, workspace, or surface changes,
+or the user reports losing access; subagent access must be established for that runtime too.
+
 The hook makes no network calls and sends nothing anywhere. On each prompt it:
 
 - Reads current model metadata from hook input and, when necessary, only the matching turn's
@@ -151,6 +158,15 @@ needs rebuilding, and neither hook script holds a copy.
 
 The tier table there is one person's mapping of task shapes to models. Yours will differ. Rewrite
 the `## Tiers` section and leave the rest, or rewrite all of it.
+
+When access is established, GPT-6.1 Sol is preferred within the Sol tier for repeated, long-running
+work across code, apps, and documents. Code cleanup, flaky-test fixes, and CI improvements are useful
+examples. Medium remains the starting effort for normal work; existing escalation triggers raise
+it to high or extra high, and the top-tier cases still use Astra. An existing 6 Sol session can
+finish a small task when switching would cost more than it saves. See the official
+[model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
+[software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
+Use the effort levels exposed by the current Codex picker; API controls can differ.
 
 To drive the hook from a file of your own instead, set `MODEL_PREFLIGHT_RULES` to its path. The
 full resolution order is:

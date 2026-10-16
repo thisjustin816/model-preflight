@@ -175,8 +175,22 @@ Claude Code only:
 
 ### Codex
 
-- Sol with medium reasoning is the default tier for normal implementation and review. Raise Sol to
-  high or extra high when an Escalate trigger matches.
+Resolve the Sol tier before naming a model. Prefer GPT-6.1 Sol (`gpt-6.1-sol`) only when it is the
+active model reported by the current host, or the user has confirmed it is selectable in the
+current account, workspace, and surface's native picker. Otherwise use GPT-6 Sol (`gpt-6-sol`).
+Release announcements, plan eligibility, local defaults, cached or bundled catalogs, and access
+through another surface do not establish current access. If access is unknown, use the fallback
+without repeatedly asking the user to check. Discard earlier confirmation when the account,
+workspace, or surface changes, or the user reports losing access. For subagent choices, establish
+access in that runtime too; the parent's model alone does not prove subagent support. Both Sol
+versions are the same tier, so let an existing 6 Sol session finish a small task when switching to
+6.1 would not repay the conversation re-read.
+
+- Sol with medium reasoning is the default tier for implementation, review, explanations,
+  drafting, and ordinary research. When access is established, prefer GPT-6.1 Sol for repeated,
+  long-running work across code, apps, and documents, including code cleanup, flaky-test fixes,
+  and CI improvement. Raise the selected Sol model to high or extra high when an Escalate trigger
+  matches. Keep Astra for the top-tier cases defined by that trigger.
 - Terra with medium reasoning suits routine work that favors speed and efficiency, especially
   read-heavy exploration and supporting-document scans.
 - Luna with low reasoning suits clear, repeatable work: predetermined commands, format-only edits,
@@ -188,13 +202,15 @@ Claude Code only:
   because cost compounds on both axes. Astra selects at low reasoning by default, so name the effort
   alongside the model rather than taking what the picker offers.
 - Use Sol at ultra when the task splits into meaningful independent workstreams and the user has
-  asked for or allowed multi-agent work; ultra spawns internal sub-agents rather than deepening a
-  single chain of thought. Reserve Astra at ultra for a top-tier task that also splits that way, and
-  only when the user has accepted the allowance cost.
-- The picker lists the levels each model supports, and the set differs by model: Astra, Sol, and
-  Terra reach low, medium, high, xhigh, max, and ultra; Luna stops at max. Ultra is a level above max
-  rather than another name for it. The picker renders low as light and xhigh as extra high, so use
-  those labels when telling the user what to select, and canonical terms in config or API settings.
+  asked for or allowed multi-agent work, and that model's current picker exposes ultra; ultra
+  spawns internal sub-agents rather than deepening a single chain of thought. Reserve Astra at
+  ultra for a top-tier task that also splits that way, and only when the user has accepted the
+  allowance cost.
+- Recommend only effort levels exposed by the selected model on the current surface. Availability
+  differs by model, client, and workspace settings; API effort support does not establish Codex
+  picker support. Ultra, where offered, is above max. The picker renders low as light and xhigh as
+  extra high, so use those labels when telling the user what to select, and canonical terms in
+  config or API settings.
 - Codex has no Thinking setting, so omit that line from the pause.
 - Subagents inherit `default_subagent_model` and `default_subagent_reasoning_effort` from
   `config.toml`, so a cheap default covers mechanical fan-out but lands on demanding work too. When a
