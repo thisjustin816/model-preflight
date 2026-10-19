@@ -1,12 +1,12 @@
 {
   "name": "model-preflight",
-  "version": "1.0.0",
-  "description": "Checks model and effort fit before work, states a verdict, and pauses for a switch when needed. Maps tasks separately for Claude, Codex and ChatGPT Work, and ChatGPT Chat. Uses a PowerShell 7 or POSIX sh hook on supported hosts and a skill where hooks do not run.",
+  "version": "1.1.0",
+  "description": "Checks model and effort fit before work, states a verdict, and offers an independent agent or pauses for a session switch when needed. Maps tasks separately for Claude, Codex and ChatGPT Work, and ChatGPT Chat. Uses a PowerShell 7 or POSIX sh hook on supported hosts and a skill where hooks do not run.",
   "skills": "./skills/",
   "keywords": ["model", "routing", "cost", "hooks", "reasoning"],
   "interface": {
     "displayName": "Model Preflight",
-    "shortDescription": "Pause and switch models when the tier does not match the task",
+    "shortDescription": "Offer an independent agent or pause for a model switch",
     "category": "Workflow"
   }
 }

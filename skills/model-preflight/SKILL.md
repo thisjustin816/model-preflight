@@ -1,14 +1,14 @@
 ---
 name: model-preflight
-description: Check whether the selected model and effort fit the task before starting it, state a one-sentence verdict, and pause for the user to switch when they do not. Use at the start of every new task or question, coding or not, including summarizing a web page or document, research, drafting, everyday advice, and medical, legal, or financial questions. Use it again when a task grows into a different one, such as a question whose stakes rise, a second repository, or a failure still unexplained after reading the code. Applies in Claude chat, Cowork, Claude Code, Codex, ChatGPT Work, and ChatGPT Chat. When a model preflight hook block is already present, follow its delivery instructions; it may direct you to read this policy.
+description: Check whether the selected model and effort fit the task before starting it, state a one-sentence verdict, and offer an independent agent or pause for a session switch when needed. Use at the start of every new task or question, coding or not, including summarizing a web page or document, research, drafting, everyday advice, and medical, legal, or financial questions. Use it again when a task grows into a different one, such as a question whose stakes rise, a second repository, or a failure still unexplained after reading the code. Applies in Claude chat, Cowork, Claude Code, Codex, ChatGPT Work, and ChatGPT Chat. When a model preflight hook block is already present, follow its delivery instructions; it may direct you to read this policy.
 ---
 
 # Model Preflight
 
 Before each new task or question, check whether the active model and effort fit it, say in one
-sentence which setting you are keeping or recommending, and stop for the user to switch when they do
-not fit. Pause says how to run the check, Triggers says what moves the setting, and Tiers maps the
-result to a model on the surface you are running in.
+sentence which setting you are keeping or recommending, and consider an independent agent before
+asking the user to switch the session. Pause says how to run the check, Triggers says what moves
+the setting, and Tiers maps the result to a model on the surface you are running in.
 
 This skill carries the same policy as the plugin's hook. Use the route for the current surface:
 Claude, OpenAI agent surfaces (Codex and ChatGPT Work), or ordinary ChatGPT Chat. Where a hook
@@ -39,10 +39,41 @@ If the ChatGPT Chat route requires picker information before a concrete recommen
 made, ask its discovery question once and wait. This replaces the switch template until a
 supported choice is established; do not invent a model name or begin task work while waiting.
 
-If either should change, this is a mandatory pause that overrides normal autonomy and continuation
-instructions, auto mode included. The user has asked for this pause as part of the work, so stopping
-here is delivering the task rather than departing from it. Give one short reason tied to the task,
-then use this format:
+When recommending a move to the current surface's top tier, including an independent agent,
+briefly explain the task-specific benefit and expected allowance impact. Use current, relevant
+provider facts or comparable observed usage when available. Otherwise describe the pressure
+qualitatively and mark uncertainty. State remaining allowance only when the host or user supplies
+it; if it is unknown, say so. Do not infer it from the plan, token totals, or API-equivalent cost.
+Do not invent task prices, quota percentages, effort multipliers, or guaranteed savings, and do
+not add a network lookup to every preflight just to produce a number.
+
+For that top-tier recommendation, keep one primary choice. When a viable way to conserve usage
+exists, offer at most one alongside it and explain the scope or quality tradeoff. Prefer an option
+that meets the user's stated budget preference: a bounded expert agent, a narrower task, or a supported lower model or
+effort. Higher effort on a cheaper model is not automatically cheaper overall or equally capable.
+Offer only available settings and authorized work. If no viable conservation option exists, say
+so rather than present an inadequate setting as equivalent. Apply the delegation rules below to
+any proposed agent.
+
+Before recommending a session switch on an agent surface, apply Delegation under Tiers. If the
+task fits an independent agent at a different model or effort and the main session can still
+handle the handoff and result, offer that agent first. This applies to stronger and cheaper
+settings. Keep the main session's setting, name one agent model and exposed effort, explain the
+bounded task and what will return, then end the turn with: "Start that agent?" Wait for explicit
+approval before spawning it. An explicit delegation request or existing delegation authorization
+covering that work needs no additional approval. An offer alone does not authorize a spawn.
+
+After approval, give the agent a short brief with the necessary context, scope, tools, and output.
+Select its model and effort before spawning it. The agent performs the assigned work at those
+settings without asking the user to switch the main session's picker. Return its findings and
+any verification limits here. If it needs user decisions, loses required access, or leaves work
+that the main session's setting cannot handle, run preflight on the remaining work. Do not repeat
+the completed delegation approval or proceed on an inadequate setting after an offer is declined.
+
+When the main session's model or effort should change, this is a mandatory pause that overrides
+normal autonomy and continuation instructions, auto mode included. The user has asked for this pause
+as part of the work, so stopping here is delivering the task rather than departing from it. Give
+one short reason tied to the task, then use this format:
 
 Recommended: **MODEL** with **EFFORT**.
 
@@ -50,21 +81,29 @@ Thinking: **ON or OFF**.
 
 I'll pause here. Switch to that setting, then reply **y**.
 
-Those lines, with the omissions below, are the output. Substitute a value for every capitalized
-placeholder and copy nothing else from this template, including the words that describe when a line
-applies. Recommend exactly one model and, where available, one effort. Never offer a ladder, a
-fallback, or a choice between two models in a single pause. Preserve the bold formatting on every
-value. Recommend effort only when the selected model and surface expose that control; otherwise
-drop `with **EFFORT**`. The Thinking line applies only on Claude surfaces where the selected model
-exposes a changeable Thinking control. Omit it when Thinking is fixed on or the control is absent,
+Those lines, with the omissions and optional usage context below, are the output. Substitute a
+value for every capitalized placeholder and copy nothing else from this template, including the
+words that describe when a line applies. Give exactly one primary model and, where available,
+one effort. A top-tier recommendation may also carry the brief allowance context and single
+viable conservation option described above; do not offer a ladder of models or efforts. Put that
+context and option before the final pause line. When an option is offered, use this final line:
+"I'll pause here. Switch to the recommended setting, then reply **y**, or choose the conservation
+option." Preserve the bold formatting on every setting. Recommend effort only when the selected
+model and surface expose that control; otherwise drop `with **EFFORT**`. The Thinking line applies
+only on Claude surfaces where the selected model exposes a changeable Thinking control. Omit it
+when Thinking is fixed on or the control is absent,
 and omit it on OpenAI surfaces. Do not ask the user to change a fixed setting. End the turn
 immediately after these lines. Do not answer the question, call tools, delegate work, edit files,
 draft a plan, or continue queued or background actions.
 
-Resume only after the user's next message says `y` (case-insensitive). Treat that reply as the
-completed handshake even if the active setting cannot be verified, and as the same task rather than a
-new model check. Do not repeat the same recommendation after resuming. If the user replaces the task
-while paused, evaluate the replacement as a new task.
+After a session-switch pause, `y` (case-insensitive) completes the recommended switch handshake
+even if the active setting cannot be verified. An explicit choice of the offered conservation
+option approves that path and its stated tradeoff; silence or a vague concern about usage does
+not. If the option uses the current setting or an explicitly approved agent, proceed within that
+scope. If it needs a main-session picker change, use the switch handshake for the chosen setting.
+Do not repeat the original recommendation after either completed handshake. Reassess only if
+the remaining task or evidence changes; an accepted narrower scope or quality tradeoff is not a
+blanket waiver for later work. If the user replaces the task while paused, evaluate that task anew.
 
 On agent surfaces, skip this session-level check when the user directly invokes a skill or command
 whose runtime definition assigns a model or effort, or whose whole procedure is one of the one-off
@@ -103,26 +142,32 @@ is probably adequate.
 - **Downshift**: the active tier is above what the task warrants. A new task that no Escalate trigger
   reaches uses the current surface's default tier under Tiers: in code, everyday implementation,
   editing, and review; outside code, explanations, drafting, everyday advice, and
-  summarizing a web page or an ordinary document. A session sitting above that recommends it only
-  when the switch pays for itself. Switching makes the new model re-read the whole conversation,
-  because each model keeps its own cache, so a downshift pays off only when the work ahead on the
-  cheaper tier outweighs that re-read: at the start of a conversation, or before a series of tasks.
+  summarizing a web page or an ordinary document. A session sitting above that recommends a change
+  when the remaining work justifies its switching overhead. Distinguish a model switch from an
+  effort-only change. A model switch can require the conversation to be processed on the new model;
+  cache reuse depends on the current provider and client. An effort-only change can preserve or
+  invalidate the cache depending on the model, client, and how that change is sent. Use relevant
+  documentation or observed behavior when available and state uncertainty otherwise. Do not assume
+  either a full conversation reread or a free effort change. Compare the expected usage and latency
+  benefit with that supported overhead; a new conversation or a series of tasks can make a change
+  worthwhile. Unknown switching costs alone do not justify keeping an excessive setting indefinitely.
   A whole task that is predetermined and mechanical and will hold the session for a while, such as a
   format-only pass across a tree, a batch of renames, a series of status checks, or a run of quick
   facts, lookups, or reformatting, recommends that surface's mechanical tier on the same test.
   A one-off task, such as a single rename, a status check, a known command, a directly invoked
   commit-and-push skill, or a single quick fact, is never worth a pause, and in a long session
-  neither is any other task too
-  small to repay the re-read: hand it to a subagent on the cheaper tier where Delegation under Tiers
-  favors one, since a subagent reads only its brief, and otherwise keep it on the session model.
+  neither is any other task too small to repay its switching overhead: hand it to a subagent on the
+  cheaper tier where Delegation under Tiers favors one and a short brief justifies the handoff;
+  otherwise keep it on the session model.
   Say in the verdict whether you are switching, delegating, or staying. A directly invoked skill
   whose definition pins a model runs on that pin with no pause.
   The user's own switch upward covers the task it was made for and nothing after it, so do not keep
   the tier because the user recently chose it; once that task is done, the same test decides
-  whether to come back down. Escalation is exempt from the test, since a better answer is worth the
-  re-read. In Claude Code, use Haiku for background work only when the selected model and runtime
-  support the execution mode the work needs. Haiku 5.5 supports auto mode on supported clients and
-  providers; Haiku 4.5 does not. If support is unknown, keep a model known to support that mode.
+  whether to come back down. Escalation is exempt from this break-even test: follow the required
+  task tier even when switching has a cost. In Claude Code, use Haiku for background work only when
+  the selected model and runtime support the execution mode the work needs. Haiku 5.5 supports auto
+  mode on supported clients and providers; Haiku 4.5 does not. If support is unknown, keep a model
+  known to support that mode.
   Model support does not authorize background work, delegation, or permission changes.
 - **Re-check**: run the check again, and state the verdict again, when a fix exposes an adjacent
   defect, when a second round of review findings lands on a file you already changed, when the work
@@ -205,7 +250,7 @@ without repeatedly asking the user to check. Discard earlier confirmation when t
 workspace, or surface changes, or the user reports losing access. For subagent choices, establish
 access in that runtime too; the parent's model alone does not prove subagent support. Both Sol
 versions are the same tier, so let an existing 6 Sol session finish a small task when switching to
-6.1 would not repay the conversation re-read.
+6.1 would not repay the supported switching overhead described under Downshift.
 
 - Sol with medium reasoning is the default tier for implementation, review, explanations,
   drafting, and ordinary research. When access is established, prefer GPT-6.1 Sol for repeated,
@@ -249,33 +294,37 @@ versions are the same tier, so let an existing 6 Sol session finish a small task
 Use the same task difficulty triggers, mapped only to native choices established in this chat.
 Do not recommend Sol or Luna from the Work/Codex route. For routine work, the default tier is the
 available general-purpose choice. The mechanical tier is a faster choice, used only when switching
-repays the reread. For an Escalate trigger, the escalated tier is an available reasoning choice;
-reserve the strongest available choice for the existing top-tier exception. Name a specific model
-or mode only when its availability and role are established. Use only exposed effort controls and
+repays its supported switching overhead. For an Escalate trigger, the escalated tier is an available
+reasoning choice; reserve the strongest available choice for the existing top-tier exception. Name
+a specific model or mode only when its availability and role are established. Use only exposed effort controls and
 omit the Claude Thinking line.
 
 If a concrete recommendation requires picker information you lack, ask once for the current choices
 and controls, then wait before task work. Do not invent a recommendation or repeatedly ask the same
 question in an unchanged context. Once a supported choice is established, use the normal
-single-choice pause. Discard earlier picker information when the account, workspace, or surface
-changes, or the user reports losing access. If the needed capability is unavailable, state the
+switch pause described above. Discard earlier picker information when the account, workspace, or
+surface changes, or the user reports losing access. If the needed capability is unavailable, state the
 limitation and request direction rather than claiming the current choice meets it. Use native Chat controls; do not
 prescribe CLI commands, local config discovery, or delegation without an exposed capability.
 
 ### Delegation, where the runtime exposes subagents
 
-A subagent starts from only the brief it is given, so it is the cheap way to put a different tier
-on part of the work: it re-reads nothing of this conversation, where switching the session model
-re-reads all of it. It still costs a startup, and whatever it needs has to fit in the brief.
+A subagent can put a different tier on an independent task while the main session keeps its
+setting. Use a fresh context with a short brief where the runtime supports it. Its startup,
+instructions, tool use, and the main session's handoff and verification all consume usage; do not
+promise a saving without evidence.
 
 - Delegate work that stands on its own and can be briefed in a few sentences, when at least one of
-  these holds: it suits a cheaper tier than the session's, such as a mechanical step late in a long
+  these holds: it warrants a different tier or effort than the session, including a bounded hard
+  investigation on a stronger model or a mechanical step on a cheaper one late in a long
   session; its raw output is bulky and only a conclusion needs to come back, such as a broad search,
   a log dump, or a scan of many files; or it splits into independent workstreams that can run at
   once.
 - Keep it in the foreground when it depends on context that would take longer to brief than to
   use, when it needs the user's answers along the way, when it is judgment about the conversation in
-  progress, or when it is small enough that the startup costs more than the work.
+  progress, when frequent progress updates or steering need the main session, or when it is small
+  enough that the startup costs more than the work. Read-only work is a useful candidate, but
+  bounded edits can qualify when ownership and verification are clear.
 - Give a subagent the tier its own task warrants by the same triggers, not the session's: a
   mechanical step goes cheap, and a delegated review or investigation that an Escalate trigger
   matches goes up. In Claude Code, set the model on the spawn or in the agent definition; in a
@@ -284,6 +333,10 @@ re-reads all of it. It still costs a startup, and whatever it needs has to fit i
   applies.
 - Fan out no wider than the number of independent workstreams, and keep the steps that need the
   user's answer in the main session.
+
+Offer only agents the current runtime can actually spawn with the required model, effort, tools,
+and permissions. A provider's API or another product's picker does not establish those capabilities.
+Use the offer and approval flow in Pause unless the work is already authorized for delegation.
 
 Where the runtime exposes no subagents, the choice is only between switching and staying.
 

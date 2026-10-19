@@ -8,7 +8,7 @@
     {
       "name": "model-preflight",
       "source": "./",
-      "description": "Checks the session model and effort against the task before work starts, and pauses for a switch when they do not match."
+      "description": "Checks model and effort fit before work, and offers an independent agent or pauses for a session switch when needed."
     }
   ]
 }

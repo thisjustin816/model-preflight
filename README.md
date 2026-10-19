@@ -1,7 +1,7 @@
 # Model Preflight
 
 Checks the session model and effort against the task before work starts, says out loud which it
-picked, and stops for you to switch when they do not match.
+picked, and offers an independent agent or stops for you to switch when they do not match.
 
 The problem it solves is quiet mismatch in both directions. A session left on a small model walks
 into a security review or a cross-repo refactor and does it badly. A session left on a top-tier
@@ -10,7 +10,24 @@ that happens silently in the model's head is indistinguishable from one that nev
 
 So the check is visible. Every new task gets one sentence naming the setting being kept or
 recommended and the trigger closest to the task. When the setting is wrong, the session stops and
-waits for you rather than proceeding on the assumption you would have agreed.
+first checks whether an independent agent can do the task at the appropriate model and effort.
+When that fits, it offers one agent and waits for approval. Work that needs the main session's
+continuing judgment or interaction still gets a session-switch pause.
+
+An agent offer names the model, effort, bounded task, and expected result. After approval, the
+agent gets a short brief and returns its findings to the main session. Both stronger and cheaper
+agents qualify, subject to the current runtime's tools, permissions, and model access. Delegation
+consumes usage for the child and the handoff; a saving is not guaranteed.
+
+For a top-tier recommendation, preflight briefly explains the benefit and expected allowance
+impact. It reports remaining allowance only when the host or user supplies it. Where a viable
+way to conserve usage exists, it offers one option with its scope or quality tradeoff. Choosing
+that option explicitly approves the described path; a required picker change still uses the
+switch handshake. The plugin does not calculate task prices or remaining subscription quota.
+
+Downshift decisions distinguish changing models from changing effort within one model. Cache
+reuse and conversation-processing costs depend on the provider and client. Preflight uses relevant
+documentation or observed behavior where available and states uncertainty otherwise.
 
 ## Where it runs
 
@@ -21,7 +38,8 @@ The policy has separate routes for Claude, OpenAI agent surfaces (Codex and Chat
 ordinary ChatGPT Chat. Work shares the agent tier mapping and uses its native GUI controls. Chat
 uses only choices established in its own picker; it does not inherit Sol or Luna recommendations.
 If a concrete Chat recommendation needs unknown picker details, preflight asks once and waits
-before task work. Once a supported choice is known, the usual single-choice switch pause applies.
+before task work. Once a supported choice is known, the switch pause applies, including the usage
+context and optional conservation path for a top-tier recommendation.
 
 | Surface | Policy carrier | Delivery limits |
 | :- | :- | :- |
@@ -116,8 +134,8 @@ in the CLI or desktop app does not establish plugin support in the IDE.
 ## Releases
 
 The Claude and Codex plugin manifests carry the same `MAJOR.MINOR.PATCH` version. Versions follow
-[Semantic Versioning](https://semver.org/); the `0.x` series is still in initial development. A
-release is an annotated `vMAJOR.MINOR.PATCH` tag on the tested `main` commit. Published tags do not
+[Semantic Versioning](https://semver.org/). A release is an annotated `vMAJOR.MINOR.PATCH` tag on
+the tested `main` commit. Published tags do not
 move.
 
 For each release, update both manifests in the pull request and run
@@ -155,8 +173,10 @@ does not establish a mismatch or prove which models are selectable.
 
 Only model and effort are injected; transcript messages and credentials are not printed. This
 requires a host that actually runs the hook. Loading the policy through AGENTS.md alone cannot
-produce picker metadata. A recommendation to change model or effort ends the turn and waits for
-the user's `y`; injection does not change the picker automatically.
+produce picker metadata. A recommendation to change the main session's model or effort ends the
+turn and waits for the user's `y` or an explicit choice of its offered conservation path. An
+independent-agent offer waits for explicit approval unless delegation is already authorized.
+Injection does not change the picker or spawn an agent.
 
 The hook does not enumerate available models. The Work/Codex policy prefers GPT-6.1 Sol only
 when the host reports it as active or the user confirms it is selectable in their current account,
@@ -192,9 +212,10 @@ Several plugins route models from a `UserPromptSubmit` hook. The two nearest:
   the turn either.
 
 This plugin differs in three ways. The session model does the judging, against a policy you can
-read and edit in markdown, so no prompt text leaves the machine. It states a verdict on every new
-task, including when no switch is needed. And when a switch is warranted it ends the turn and waits
-for your `y`, because a suggestion the model keeps working past arrives too late to matter.
+read and edit in markdown, so the hook sends no prompt text to a routing service. It states a
+verdict on every new task, including when no switch is needed. Before a session switch it can
+offer an independent agent, with approval. A session-switch recommendation ends the turn and
+waits for your `y` or an explicit choice of an offered conservation path.
 
 ## What it injects
 

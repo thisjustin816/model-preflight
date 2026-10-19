@@ -76,6 +76,20 @@ class SessionSettingsTests(unittest.TestCase):
         self.assertIn('Wait for y.', context)
         self.assertNotIn('read the policy', context)
 
+    def test_wrappers_do_not_require_pause_for_every_trigger(self):
+        for turn, tiers in ((1, 'SMALL_TIER'), (2, 'SMALL_TIER'), (1, 'LARGE_TIER ' * 1000)):
+            with self.subTest(turn=turn, large=len(tiers) > 100):
+                context = self.contexts(
+                    dict(self.input, reasoning_effort='high'),
+                    turn=turn, rules=self.policy(tiers=tiers).as_posix(),
+                )
+                self.assertNotIn('If a trigger applies,', context)
+                self.assertNotIn('Pause even if you are confident', context)
+                self.assertNotIn('if a trigger now matches, stop', context)
+                self.assertIn('stay', context)
+                self.assertIn('delegation', context)
+                self.assertIn('session-switch', context)
+
     def test_relative_selected_policy_uses_absolute_reference(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             rules = Path(directory) / 'chosen rules [approved].md'
