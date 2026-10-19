@@ -1,11 +1,11 @@
 {
   "name": "model-preflight",
   "displayName": "Model Preflight",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Justin Beeson"
   },
-  "description": "Checks model and effort fit before work, states a verdict, and pauses for a switch when needed. Maps tasks separately for Claude, Codex and ChatGPT Work, and ChatGPT Chat. Uses a PowerShell 7 or POSIX sh hook on supported hosts and a skill where hooks do not run.",
+  "description": "Checks model and effort fit before work, states a verdict, and offers an independent agent or pauses for a session switch when needed. Maps tasks separately for Claude, Codex and ChatGPT Work, and ChatGPT Chat. Uses a PowerShell 7 or POSIX sh hook on supported hosts and a skill where hooks do not run.",
   "homepage": "https://github.com/thisjustin816/model-preflight",
   "repository": "https://github.com/thisjustin816/model-preflight",
   "license": "MIT",

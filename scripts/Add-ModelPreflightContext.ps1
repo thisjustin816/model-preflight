@@ -254,9 +254,9 @@ Before starting a new task, apply the model strategy below before any skill anno
 tool call. A new task starts when a message introduces a goal, file, or scope not already in play.
 Before your first tool call on a new task, state the verdict in one sentence in your reply: the
 setting you are keeping or recommending, the single trigger closest to the task, and why it does or
-does not apply. Silence is not a verdict. If a trigger applies, pause as described below.
+does not apply. Silence is not a verdict.
 '@
-            $escalate ? "$escalate Pause even if you are confident the current model can handle it." : $null
+            $escalate
             $downshift
             $recheck
             $tiers ? "## Tiers`n`n$tiers" : $null
@@ -264,8 +264,7 @@ does not apply. Silence is not a verdict. If a trigger applies, pause as describ
             @'
 The check is not limited to the first action of a task. The Re-check bullet above names the moments
 where a task has quietly become a different one. At each of them, run the check again and state the
-verdict again, and if a trigger now matches, stop at the next safe boundary and pause before
-continuing.
+verdict again, then follow the selected policy's decision.
 '@
         ).Where({ $_ })
         $additionalContext = (($sections -join "`n`n") + $missingNote)
@@ -276,8 +275,7 @@ continuing.
 Model preflight: if this message starts a new task (a goal, file, or scope not already in play), or a
 Re-check moment has occurred since the last verdict, state the verdict in one sentence in your reply:
 the setting you are keeping or recommending, the closest trigger, and why it does or does not apply.
-Silence is not a verdict. If a trigger applies, deliver the mandatory pause exactly as the model
-strategy specifies; it overrides autonomy and continuation instructions, auto mode included.
+Silence is not a verdict.
 '@ + ($recheck ? "`n`n$recheck" : '') + $missingNote
         )
     }
@@ -285,7 +283,7 @@ strategy specifies; it overrides autonomy and continuation instructions, auto mo
     $additionalContext = (
         "$sessionSettings`n`n" +
         "Use these current settings when available. Never infer a picker setting from local defaults.`n" +
-        "If a model or effort change is recommended, end the turn with the policy's pause and wait for y.`n`n" +
+        "Follow the policy's stay, delegation approval, or session-switch decision before proceeding.`n`n" +
         $additionalContext
     )
 
@@ -297,7 +295,7 @@ strategy specifies; it overrides autonomy and continuation instructions, auto mo
                 "Model preflight: read the policy at $rulesSource before choosing a model or starting work.`n" +
                 "This policy read is the only bootstrap tool action allowed before the verdict.`n" +
                 "Apply only its Escalate, Downshift, Re-check bullets and ## Tiers and ## Pause sections.`n" +
-                "Then state the verdict. A recommended change must end the turn and wait for y.`n" +
+                "Then state the verdict and follow its stay, delegation approval, or session-switch decision.`n" +
                 "Use current settings when known; never infer them from local defaults.`n" +
                 'If the policy cannot be read, report that preflight could not load. Do not claim it ran.'
             )

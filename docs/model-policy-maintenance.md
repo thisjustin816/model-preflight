@@ -66,8 +66,10 @@ Use this sequence:
    evaluation conditions, and limitations. A headline benchmark or a newer name alone does not
    justify promoting a model, changing all tiers, or extrapolating across unrelated tasks.
 3. Choose the lowest model and exposed effort that meet the task's quality needs. Weigh latency,
-   allowance or cost, expected work remaining, and the cost of rereading a conversation. Keep
-   product usage limits separate from API token prices. State any unmeasured tradeoff.
+   allowance or cost, and expected work remaining. Distinguish model changes from effort-only
+   changes and check the current model, provider, and client's cache and conversation-processing
+   behavior. Use documented or observed switching costs and state uncertainty where they are
+   unknown. Keep product usage limits separate from API token prices. State any unmeasured tradeoff.
 4. Decide whether this changes a task trigger, the model within an existing tier, an effort or
    Thinking recommendation, or only availability wording. Keep the existing tiers unless the
    evidence and requested scope justify changing them. Preserve user permissions and the pause.

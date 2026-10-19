@@ -1,5 +1,5 @@
 {
-  "description": "Model preflight: checks the session model and effort against each new task and pauses for a switch when they do not match",
+  "description": "Model preflight: checks model and effort fit, offers an independent agent, or pauses for a session switch",
   "hooks": {
     "UserPromptSubmit": [
       {

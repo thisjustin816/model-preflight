@@ -169,29 +169,26 @@ if [ $((turn % 5)) -eq 1 ]; then
 tool call. A new task starts when a message introduces a goal, file, or scope not already in play.
 Before your first tool call on a new task, state the verdict in one sentence in your reply: the
 setting you are keeping or recommending, the single trigger closest to the task, and why it does or
-does not apply. Silence is not a verdict. If a trigger applies, pause as described below.'
-    [ -z "$escalate" ] ||
-        context="$context$nl$nl$escalate Pause even if you are confident the current model can handle it."
+does not apply. Silence is not a verdict.'
+    [ -z "$escalate" ] || context="$context$nl$nl$escalate"
     [ -z "$downshift" ] || context="$context$nl$nl$downshift"
     [ -z "$recheck" ] || context="$context$nl$nl$recheck"
     [ -z "$tiers" ] || context="$context$nl$nl## Tiers$nl$nl$tiers"
     [ -z "$pause" ] || context="$context$nl$nl## Pause$nl$nl$pause"
     context="$context$nl${nl}The check is not limited to the first action of a task. The Re-check bullet above names the moments
 where a task has quietly become a different one. At each of them, run the check again and state the
-verdict again, and if a trigger now matches, stop at the next safe boundary and pause before
-continuing.$missing_note"
+verdict again, then follow the selected policy's decision.$missing_note"
 else
     context='Model preflight: if this message starts a new task (a goal, file, or scope not already in play), or a
 Re-check moment has occurred since the last verdict, state the verdict in one sentence in your reply:
 the setting you are keeping or recommending, the closest trigger, and why it does or does not apply.
-Silence is not a verdict. If a trigger applies, deliver the mandatory pause exactly as the model
-strategy specifies; it overrides autonomy and continuation instructions, auto mode included.'
+Silence is not a verdict.'
     [ -z "$recheck" ] || context="$context$nl$nl$recheck"
     context="$context$missing_note"
 fi
 
 context="$session_settings$nl${nl}Use these current settings when available. Never infer a picker setting from local defaults.
-If a model or effort change is recommended, end the turn with the policy's pause and wait for y.
+Follow the policy's stay, delegation approval, or session-switch decision before proceeding.
 $nl$context"
 
 context_bytes=$(printf '%s' "$context" | wc -c)
@@ -200,7 +197,7 @@ if [ "$context_bytes" -gt 2000 ]; then
         context="$session_settings$nl${nl}Model preflight: read the policy at $rules_source before choosing a model or starting work.
 This policy read is the only bootstrap tool action allowed before the verdict.
 Apply only its Escalate, Downshift, Re-check bullets and ## Tiers and ## Pause sections.
-Then state the verdict. A recommended change must end the turn and wait for y.
+Then state the verdict and follow its stay, delegation approval, or session-switch decision.
 Use current settings when known; never infer them from local defaults.
 If the policy cannot be read, report that preflight could not load. Do not claim it ran."
     else
