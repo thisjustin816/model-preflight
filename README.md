@@ -1,7 +1,7 @@
 # Model Preflight
 
-Checks the session model and effort against the task before work starts, says out loud which it
-picked, and offers an independent agent or stops for you to switch when they do not match.
+Requires the latest stable model version within the task's tier, checks effort before work
+starts, and says out loud which setting it picked. An older version requires an explicit choice.
 
 The problem it solves is quiet mismatch in both directions. A session left on a small model walks
 into a security review or a cross-repo refactor and does it badly. A session left on a top-tier
@@ -9,8 +9,8 @@ model answers a status question and spends the quota anyway. Neither announces i
 that happens silently in the model's head is indistinguishable from one that never happened.
 
 So the check is visible. Every new task gets one sentence naming the setting being kept or
-recommended and the trigger closest to the task. When the setting is wrong, the session stops and
-first checks whether an independent agent can do the task at the appropriate model and effort.
+recommended and the trigger closest to the task. Model freshness is resolved first. For a tier
+or effort mismatch, the session checks whether an independent agent can do the task at the appropriate setting.
 When that fits, it offers one agent and waits for approval. Work that needs the main session's
 continuing judgment or interaction still gets a session-switch pause.
 
@@ -178,14 +178,23 @@ turn and waits for the user's `y` or an explicit choice of its offered conservat
 independent-agent offer waits for explicit approval unless delegation is already authorized.
 Injection does not change the picker or spawn an agent.
 
-The hook does not enumerate available models. The Work/Codex policy prefers GPT-6.1 Sol only
-when the host reports it as active or the user confirms it is selectable in their current account,
-workspace, and surface's native picker. Unknown or unavailable 6.1 access uses GPT-6 Sol, without
-repeated availability prompts. A release announcement, configured default, or cached model catalog
-does not establish access. Confirmation expires when the account, workspace, or surface changes,
-or the user reports losing access; subagent access must be established for that runtime too.
+The policy requires the latest stable version within the selected task tier. At the first
+preflight in a session, the model checks current official provider guidance or authoritative
+live host metadata, then reuses that evidence until a newer release or a changed access context.
+When a source check is needed, it states the observed setting and the pending check before the
+lookup, then gives its completed verdict before task work. If the source cannot be checked,
+continuing with an unverified version requires the user's explicit choice.
 
-The hook makes no network calls and sends nothing anywhere. On each prompt it:
+The hook does not enumerate available models. Access is established separately by active-model
+metadata or the user's confirmation from the current native picker. Unknown access prompts one
+question and pauses work. Known access to a newer version requires the session-switch pause,
+including for short tasks. An older version requires the user's explicit choice. A release,
+configured default, or cached catalog does not establish access. Confirmation expires when the
+account, workspace, provider, or surface changes, or access is lost. Subagent availability is
+checked in its own runtime.
+
+The hook makes no network calls and sends nothing anywhere. The model's version check can use
+an official documentation lookup. On each prompt the hook:
 
 - Reads current model metadata from hook input and, when necessary, only the matching turn's
   settings from the host-provided transcript.
@@ -251,11 +260,11 @@ needs rebuilding, and neither hook script holds a copy.
 The tier table there is one person's mapping of task shapes to models. Yours will differ. Rewrite
 the `## Tiers` section and leave the rest, or rewrite all of it.
 
-In Work and Codex, when access is established, GPT-6.1 Sol is preferred within the Sol tier for
-repeated, long-running work across code, apps, and documents. Code cleanup, flaky-test fixes, and
-CI improvements are useful examples. Medium remains the starting effort for normal work; existing escalation triggers raise
-it to high or extra high, and the top-tier cases still use Astra. An existing 6 Sol session can
-finish a small task when switching would cost more than it saves. See the official
+In Work and Codex, GPT-6.1 Sol is the latest reviewed Sol version; preflight verifies that it is
+still current and available before task work. Code cleanup, flaky-test fixes, and CI improvements
+are useful examples. Medium remains the starting effort for normal work; existing escalation
+triggers raise it to high or extra high, and the top-tier cases still use Astra. GPT-6 Sol
+requires an explicit choice to use an older version, even for a small task. See the official
 [model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
 [software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
 Use the effort levels exposed by the current Work or Codex picker; API controls can differ.

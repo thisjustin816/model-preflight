@@ -2,7 +2,9 @@
 
 Use this procedure when asked to refresh Model Preflight, when a model release, retirement, or
 control change could affect its recommendations, and before publishing the resulting policy.
-Research happens during maintenance. Per-task preflight uses the reviewed policy.
+Research about task tiers and effort happens during maintenance. Preflight uses the reviewed
+criteria and verifies model-version freshness once per session, reusing that evidence until
+the release or access context changes.
 
 Start with: "Refresh Model Preflight using docs/model-policy-maintenance.md, comparing current
 official guidance with the last reviewed policy."
@@ -50,7 +52,8 @@ mode, and plugin hook or skill needed by the proposed rule. Mark unknowns explic
 
 An API capability does not prove the same control exists in a product picker. A release,
 subscription entitlement, local default, or cached catalog does not prove a particular account
-can select a model. Preserve runtime availability gates and the established fallback. Confirm
+can select a model. Preserve runtime availability gates and the explicit choice required to
+continue on an older or unverified version. Confirm
 access through the current host's active-model metadata or the user's current native picker
 confirmation where the policy permits it; check subagent access in that runtime separately.
 
@@ -102,7 +105,8 @@ missing-policy case. Inspect the selected policy reference and the opening/remin
 budget. Read the complete changed policy for contradictions.
 
 Review representative decisions: routine work, an escalation, a downshift late in a session,
-known and unknown model access, a changed surface, unsupported effort, fixed Thinking, and
+known and unknown model access, an older version on a short task, explicit permission to use
+an older version, a changed surface, unsupported effort, fixed Thinking, and
 background work with supported or unknown execution-mode support. Record the expected decision
 and why the written rule gives it. These are policy reviews; string matching and transport
 tests do not establish that a model follows the policy.
