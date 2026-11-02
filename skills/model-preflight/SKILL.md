@@ -1,6 +1,6 @@
 ---
 name: model-preflight
-description: Check whether the selected model and effort fit the task before starting it, state a one-sentence verdict, and offer an independent agent or pause for a session switch when needed. Use at the start of every new task or question, coding or not, including summarizing a web page or document, research, drafting, everyday advice, and medical, legal, or financial questions. Use it again when a task grows into a different one, such as a question whose stakes rise, a second repository, or a failure still unexplained after reading the code. Applies in Claude chat, Cowork, Claude Code, Codex, ChatGPT Work, and ChatGPT Chat. When a model preflight hook block is already present, follow its delivery instructions; it may direct you to read this policy.
+description: Check that the selected model is current within its task tier and its effort fits the work, state a one-sentence verdict, and offer an independent agent or pause for a session switch when needed. Use at the start of every new task or question, coding or not, including summarizing a web page or document, research, drafting, everyday advice, and medical, legal, or financial questions. Use it again when a task grows into a different one, such as a question whose stakes rise, a second repository, or a failure still unexplained after reading the code. Applies in Claude chat, Cowork, Claude Code, Codex, ChatGPT Work, and ChatGPT Chat. When a model preflight hook block is already present, follow its delivery instructions; it may direct you to read this policy.
 ---
 
 # Model Preflight
@@ -21,9 +21,9 @@ spent whether or not the answer would differ.
 
 ## Pause
 
-At the start of every new task, compare the active model and effort with what the task warrants,
-before answering and before any skill or mode announcement, tool call, file operation, plan, or
-delegated work.
+At the start of every new task, check model freshness under Tiers and compare the active model
+and effort with what the task warrants, before answering and before any skill or mode
+announcement, tool call, file operation, plan, or delegated work.
 
 If the hook directs you to read its selected policy file, that policy read is the only bootstrap
 tool action allowed before the verdict. Apply only its Escalate, Downshift, and Re-check bullets
@@ -34,6 +34,13 @@ State the verdict in one sentence before beginning, whether or not a change is w
 you are keeping or recommending, the closest trigger, and why it does or does not apply. A check
 nobody can see cannot be corrected, and a session that never shows one is indistinguishable from a
 session that never ran it.
+
+If the latest stable version has not been verified in this session, make the initial verdict
+name the observed setting and say that version verification is pending. After that verdict,
+perform only the provider-source check described under Tiers, then state the completed verdict
+before task work. This check follows the initial verdict; the selected-policy read remains the
+only tool action allowed before it. If the source cannot be checked, report the gap and ask
+once whether to proceed with the unverified version. Wait for the user's explicit choice.
 
 If the ChatGPT Chat route requires picker information before a concrete recommendation can be
 made, ask its discovery question once and wait. This replaces the switch template until a
@@ -55,7 +62,9 @@ Offer only available settings and authorized work. If no viable conservation opt
 so rather than present an inadequate setting as equivalent. Apply the delegation rules below to
 any proposed agent.
 
-Before recommending a session switch on an agent surface, apply Delegation under Tiers. If the
+Resolve the main session's model freshness before considering delegation. An agent does not
+make an older main-session version current. For task-tier or effort changes on an agent
+surface, apply Delegation under Tiers before recommending a session switch. If the
 task fits an independent agent at a different model or effort and the main session can still
 handle the handoff and result, offer that agent first. This applies to stronger and cheaper
 settings. Keep the main session's setting, name one agent model and exposed effort, explain the
@@ -105,12 +114,12 @@ Do not repeat the original recommendation after either completed handshake. Reas
 the remaining task or evidence changes; an accepted narrower scope or quality tradeoff is not a
 blanket waiver for later work. If the user replaces the task while paused, evaluate that task anew.
 
-On agent surfaces, skip this session-level check when the user directly invokes a skill or command
+On agent surfaces, skip the task-tier check when the user directly invokes a skill or command
 whose runtime definition assigns a model or effort, or whose whole procedure is one of the one-off
 tasks the Downshift bullet describes. Let a runtime assignment apply where the tool has one, and
 route the rest as that bullet says, without a model-switch prompt. Detect an assignment from the
 runtime definition rather than maintaining a command allowlist, and apply the normal preflight if
-the task expands beyond the routed workflow.
+the task expands beyond the routed workflow. The current-version requirement still applies.
 
 ## Triggers
 
@@ -160,7 +169,7 @@ is probably adequate.
   cheaper tier where Delegation under Tiers favors one and a short brief justifies the handoff;
   otherwise keep it on the session model.
   Say in the verdict whether you are switching, delegating, or staying. A directly invoked skill
-  whose definition pins a model runs on that pin with no pause.
+  whose definition pins a current model runs on that pin with no task-tier pause.
   The user's own switch upward covers the task it was made for and nothing after it, so do not keep
   the tier because the user recently chose it; once that task is done, the same test decides
   whether to come back down. Escalation is exempt from this break-even test: follow the required
@@ -168,6 +177,8 @@ is probably adequate.
   the selected model and runtime support the execution mode the work needs. Haiku 5.5 supports auto
   mode on supported clients and providers; Haiku 4.5 does not. If support is unknown, keep a model
   known to support that mode.
+  The current-version requirement under Tiers is exempt from this switching-overhead test,
+  including for one-off tasks and skills with runtime model assignments.
   Model support does not authorize background work, delegation, or permission changes.
 - **Re-check**: run the check again, and state the verdict again, when a fix exposes an adjacent
   defect, when a second round of review findings lands on a file you already changed, when the work
@@ -178,7 +189,10 @@ is probably adequate.
   trigger, so a re-check that finds one normally ends in a switch up rather than in keeping the
   tier. Reviewing or verifying work the session already produced is where staying put is most
   tempting and least often right. Use the current surface's escalated tier under Tiers; its top
-  tier applies only under the Escalate bullet's one-hard-question exception.
+  tier applies only under the Escalate bullet's one-hard-question exception. Also recheck model
+  freshness when a newer stable release is identified, the account, workspace, provider, or
+  surface changes, or access is lost. These freshness checks alone do not raise the task tier
+  or reasoning effort.
 
 ## Tiers
 
@@ -187,6 +201,36 @@ Cowork, and Claude chat; OpenAI agent surfaces for Codex and ChatGPT Work; and C
 ordinary Chat. Apply only that route. Model names, controls, and access established on another
 surface do not establish what this one offers. A matching trigger outranks the tier examples.
 Delegation applies only where the runtime exposes subagents and the user's permissions allow it.
+
+### Current versions within each tier
+
+Choose the task tier first, then require the most current stable release of that tier's model
+family on the current surface. Compare versions within a family: a newer Sol release does not
+replace Astra for a top-tier task. Preview releases need the user's explicit choice.
+
+At the first preflight in a session, verify the latest stable version against current official
+provider guidance for that surface, or authoritative live host metadata that explicitly
+identifies the latest stable release. For OpenAI, start with the
+[Work and Codex model guide](https://learn.chatgpt.com/docs/models); for Claude Code, start with
+[model configuration](https://code.claude.com/docs/en/model-config), and follow the applicable
+provider and surface guidance. Ordinary Chat uses its own official model guidance and native
+picker. A policy's version examples, training knowledge, a configured default, or a cached or
+bundled catalog alone do not verify freshness. Reuse evidence from this session until a newer
+release is identified or the account, workspace, provider, or surface changes.
+
+Verify availability separately. An active model reported by the current host or the user's
+confirmation from the current native picker establishes access on that surface. A release
+announcement or plan entitlement does not. If access to the current version is unknown, ask
+once whether it is selectable and wait before task work. If it is available and the session
+uses an older version, use the session-switch pause. If it is unavailable, explain the limit
+and ask whether to continue on the named older version or stop. Use an older version only
+after the user's explicit choice, within the scope they accepted. Do not repeat an answered
+access question in an unchanged context.
+
+Short tasks, switching overhead, managed defaults, runtime model pins, and delegation do not
+waive this requirement. Apply it separately to subagents in their runtime; parent access does
+not prove subagent access. Pass established release evidence in a delegated brief so the agent
+can reuse it. Never silently change a picker or configuration to satisfy the check.
 
 ### Claude
 
@@ -238,22 +282,20 @@ Claude Code only:
   in place it outranks user settings at every launch, so an escalation lasts only until the session
   ends; recommend the switch again rather than assuming it survived. In config, use the plain
   aliases fable, opus, sonnet, and haiku, never a dated snapshot.
+- An alias can resolve to an older release on a different provider or client. Check its actual
+  resolution against current provider guidance; the alias name alone does not prove freshness.
 
 ### OpenAI agent surfaces: Codex and ChatGPT Work
 
-Resolve the Sol tier before naming a model. Prefer GPT-6.1 Sol (`gpt-6.1-sol`) only when it is the
-active model reported by the current host, or the user has confirmed it is selectable in the
-current account, workspace, and surface's native picker. Otherwise use GPT-6 Sol (`gpt-6-sol`).
-Release announcements, plan eligibility, local defaults, cached or bundled catalogs, and access
-through another surface do not establish current access. If access is unknown, use the fallback
-without repeatedly asking the user to check. Discard earlier confirmation when the account,
-workspace, or surface changes, or the user reports losing access. For subagent choices, establish
-access in that runtime too; the parent's model alone does not prove subagent support. Both Sol
-versions are the same tier, so let an existing 6 Sol session finish a small task when switching to
-6.1 would not repay the supported switching overhead described under Downshift.
+The latest stable versions reviewed November 2, 2026, are GPT-6.1 Sol (`gpt-6.1-sol`), GPT-6.1
+Terra (`gpt-6.1-terra`), GPT-6 Luna (`gpt-6-luna`), and GPT-6 Astra (`gpt-6-astra`). Verify their
+freshness and availability under Current versions within each tier; this list is a starting point
+for that check. GPT-6 Sol is an older Sol version. Unknown 6.1 access requires the discovery
+pause, and confirmed 6.1 access requires a switch from 6 Sol even for a small task, unless the
+user explicitly chooses the older version.
 
 - Sol with medium reasoning is the default tier for implementation, review, explanations,
-  drafting, and ordinary research. When access is established, prefer GPT-6.1 Sol for repeated,
+  drafting, and ordinary research. Use the current stable Sol version for repeated,
   long-running work across code, apps, and documents, including code cleanup, flaky-test fixes,
   and CI improvement. The escalated tier uses the selected Sol model at high or extra high.
   Keep Astra for the top-tier cases defined by the Escalate trigger.
