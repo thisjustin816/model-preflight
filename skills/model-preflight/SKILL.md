@@ -324,8 +324,8 @@ user explicitly chooses the older version.
   Do not apply CLI commands or `config.toml` instructions to hosted Work. Omit the Claude
   Thinking line.
 - In Codex runtimes that support local subagent configuration, subagents inherit
-  `default_subagent_model` and `default_subagent_reasoning_effort` from `config.toml`, so a cheap
-  default covers mechanical fan-out but lands on demanding work too. When a spawned subagent's
+  `default_subagent_model` and `default_subagent_reasoning_effort` from the `[agents]` table in
+  `config.toml`, so a cheap default covers mechanical fan-out but lands on demanding work too. When a spawned subagent's
   task is not mechanical, set `model` and `reasoning_effort` on the spawn to the tier the task
   warrants, judged by the same triggers as the session-level check. That override needs
   `fork_turns` set to `"none"` or a positive integer, because a full-history fork inherits the

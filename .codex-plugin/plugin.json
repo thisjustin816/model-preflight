@@ -1,6 +1,6 @@
 {
   "name": "model-preflight",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Requires the current model version within each task tier, checks effort fit, and states a verdict before work. Offers an independent agent or pauses for a session switch. Supports Claude, Codex and ChatGPT Work, and ChatGPT Chat through a hook or skill.",
   "skills": "./skills/",
   "keywords": ["model", "routing", "cost", "hooks", "reasoning"],
