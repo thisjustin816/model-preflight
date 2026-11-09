@@ -98,7 +98,10 @@ viable conservation option described above; do not offer a ladder of models or e
 context and option before the final pause line. When an option is offered, use this final line:
 "I'll pause here. Switch to the recommended setting, then reply **y**, or choose the conservation
 option." Preserve the bold formatting on every setting. Recommend effort only when the selected
-model and surface expose that control; otherwise drop `with **EFFORT**`. The Thinking line applies
+model and surface support selecting that effort, through either a preset or manual controls;
+otherwise drop `with **EFFORT**`. A missing slider preset alone does not remove the effort
+recommendation. For OpenAI GUI clients, put any needed manual-selection instruction in the
+reason line before the template. The Thinking line applies
 only on Claude surfaces where the selected model exposes a changeable Thinking control. Omit it
 when Thinking is fixed on or the control is absent,
 and omit it on OpenAI surfaces. Do not ask the user to change a fixed setting. End the turn
@@ -219,7 +222,9 @@ bundled catalog alone do not verify freshness. Reuse evidence from this session 
 release is identified or the account, workspace, provider, or surface changes.
 
 Verify availability separately. An active model reported by the current host or the user's
-confirmation from the current native picker establishes access on that surface. A release
+confirmation from the current native picker, including manual or Advanced controls, establishes
+access on that surface. A missing slider preset does not establish that the model or effort is
+unavailable. A release
 announcement or plan entitlement does not. If access to the current version is unknown, ask
 once whether it is selectable and wait before task work. If it is available and the session
 uses an older version, use the session-switch pause. If it is unavailable, explain the limit
@@ -314,13 +319,22 @@ user explicitly chooses the older version.
   spawns internal sub-agents rather than deepening a single chain of thought. Reserve Astra at
   ultra for a top-tier task that also splits that way, and only when the user has accepted the
   allowance cost.
-- Recommend only effort levels exposed by the selected model on the current surface. Availability
-  differs by model, client, and workspace settings; API effort support does not establish product
-  picker support. Ultra, where offered, is above max. The picker renders low as light and xhigh as
+- Choose the model and effort for the task before mapping the recommendation to UI controls.
+  The Codex app can combine model families and preset efforts on one slider, progressing through
+  Luna, Terra, Sol, and Astra. Each stop selects a model and effort pair; it is not an effort-only
+  scale for one model. Presets vary by client, plan, workspace settings, and rollout, so do not
+  hardcode their number or exact pairs. Recommend the appropriate pair even when it has no slider
+  preset; the user can set the model and effort individually through manual or Advanced controls.
+  Missing presets alone must not cause a downgrade, an access question, or omission of the effort.
+  If the model or effort is actually unavailable through those controls, apply the availability
+  rules above. API effort support alone does not establish product control support.
+  Ultra, where offered, is above max. The picker renders low as light and xhigh as
   extra high, so use those labels when telling the user what to select, and canonical terms in
   config or API settings.
-- In an interactive Codex CLI session, use `/model`. In Work and GUI clients, name the model and
-  reasoning controls actually exposed beneath the composer, including Advanced where available.
+- In an interactive Codex CLI session, use `/model`. In Work and GUI clients, name the recommended
+  model and effort pair. Use a matching slider preset when available; otherwise direct the user
+  to select the model and effort individually, using Advanced where available. Do not invent a
+  preset label or position when the current slider layout is unknown.
   Do not apply CLI commands or `config.toml` instructions to hosted Work. Omit the Claude
   Thinking line.
 - In Codex runtimes that support local subagent configuration, subagents inherit

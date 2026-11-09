@@ -60,7 +60,11 @@ that the model fails to apply. Provider references: [Claude plugins](https://sup
 
 In Claude chat and Cowork the pause names the native model menu and the effort or extended thinking
 controls it exposes, since there is no `/model` command there. OpenAI GUI routes use their native
-controls. Each route omits controls that the selected model fixes or does not offer.
+controls. The Codex app can combine models and preset efforts on one slider. Preflight recommends
+the model and effort pair the task needs, using a matching preset when available or directing the
+user to set both individually through manual or Advanced controls. A missing preset does not
+establish that the pair is unavailable. Each route omits controls that the selected model fixes
+or the surface does not support, including through manual controls.
 
 The triggers cover everyday chat as well as code. Summaries, drafting, explanations, and everyday
 advice stay on the default tier. Medical, legal, financial, or safety questions, research that has
@@ -267,7 +271,8 @@ triggers raise it to high or extra high, and the top-tier cases still use Astra.
 requires an explicit choice to use an older version, even for a small task. See the official
 [model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
 [software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
-Use the effort levels exposed by the current Work or Codex picker; API controls can differ.
+Use the effort levels supported by the current Work or Codex client's presets or manual controls;
+API controls can differ. Recommendations are not limited to the pairs on the app's preset slider.
 
 To drive the hook from a file of your own instead, set `MODEL_PREFLIGHT_RULES` to its path. The
 full resolution order is:
