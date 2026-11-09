@@ -35,6 +35,13 @@ you are keeping or recommending, the closest trigger, and why it does or does no
 nobody can see cannot be corrected, and a session that never shows one is indistinguishable from a
 session that never ran it.
 
+Before recommending a stronger setting, identify the concrete reasoning problem or failure
+risk, explain why the current or lower setting is insufficient, and state what the proposed
+model and effort pair adds. File count, repository count, another review round, tool use, and
+saying that verification matters are not sufficient by themselves. Without a task-specific
+case for the increase, keep the lower adequate setting. Label an anticipated risk as a judgment;
+do not describe it as an observed model failure.
+
 If the latest stable version has not been verified in this session, make the initial verdict
 name the observed setting and say that version verification is pending. After that verdict,
 perform only the provider-source check described under Tiers, then state the completed verdict
@@ -47,14 +54,15 @@ made, ask its discovery question once and wait. This replaces the switch templat
 supported choice is established; do not invent a model name or begin task work while waiting.
 
 When recommending a move to the current surface's top tier, including an independent agent,
-briefly explain the task-specific benefit and expected allowance impact. Use current, relevant
-provider facts or comparable observed usage when available. Otherwise describe the pressure
+or any move to Astra on an OpenAI agent surface, briefly explain the task-specific benefit and
+expected allowance impact. Use current provider facts or comparable observed usage when
+available. Otherwise describe the pressure
 qualitatively and mark uncertainty. State remaining allowance only when the host or user supplies
 it; if it is unknown, say so. Do not infer it from the plan, token totals, or API-equivalent cost.
 Do not invent task prices, quota percentages, effort multipliers, or guaranteed savings, and do
 not add a network lookup to every preflight just to produce a number.
 
-For that top-tier recommendation, keep one primary choice. When a viable way to conserve usage
+For that recommendation, keep one primary choice. When a viable way to conserve usage
 exists, offer at most one alongside it and explain the scope or quality tradeoff. Prefer an option
 that meets the user's stated budget preference: a bounded expert agent, a narrower task, or a supported lower model or
 effort. Higher effort on a cheaper model is not automatically cheaper overall or equally capable.
@@ -93,7 +101,7 @@ I'll pause here. Switch to that setting, then reply **y**.
 Those lines, with the omissions and optional usage context below, are the output. Substitute a
 value for every capitalized placeholder and copy nothing else from this template, including the
 words that describe when a line applies. Give exactly one primary model and, where available,
-one effort. A top-tier recommendation may also carry the brief allowance context and single
+one effort. An Astra or top-tier recommendation may also carry the brief allowance context and single
 viable conservation option described above; do not offer a ladder of models or efforts. Put that
 context and option before the final pause line. When an option is offered, use this final line:
 "I'll pause here. Switch to the recommended setting, then reply **y**, or choose the conservation
@@ -133,24 +141,26 @@ is probably adequate.
 - **Escalate**: in code, security-sensitive work, meaning judging a security finding or changing how
   code handles untrusted input, auth, secrets, or permissions, as opposed to prose that merely
   mentions them; a bug still unexplained after actually reading the code involved, not merely
-  not-yet-investigated; a migration or refactor spanning several files; and infrastructure changes
-  that destroy or replace resources. Outside code, advice with real medical, legal, financial, or
-  safety consequences, such as reading symptoms, test results, a prescription, a contract, or a tax
+  not-yet-investigated; a migration or refactor requiring decisions about interacting behavior or
+  contracts; and infrastructure changes that destroy or replace resources. Outside code, advice
+  with real medical, legal, financial, or safety consequences, such as reading symptoms, test
+  results, a prescription, a contract, or a tax
   question; research that has to reconcile many sources or conflicting evidence; and synthesis
   across a long document or several documents. Anywhere, design or decision work with several
-  interacting tradeoffs, and a task that has outgrown its first shape, such as a second round of
-  review findings on a file you already changed, a fix that exposed an adjacent defect, scope
-  reaching a second repository or component, or a general question turning into one about the
-  user's own health, money, or legal position. A matching task takes the escalated tier for the
-  current surface under Tiers, unless it is one hard question, decided once, whose wrong answer
+  interacting tradeoffs, or remaining work whose ambiguity or failure consequences have grown
+  beyond its original scope. A second repository, more files, another review round, user
+  feedback, or an adjacent defect requires reassessment under Re-check; it qualifies for
+  escalation only when the remaining work meets a substantive condition in this bullet.
+  A known release sequence, repeated configuration edits, or a settled refactor does not
+  escalate solely because it crosses files or repositories. A matching task takes the escalated
+  tier for the current surface under Tiers, unless it is one hard question, decided once, whose wrong answer
   is expensive to undo or slow to surface: adjudicating an exploit path, choosing an
   architecture that locks in a data model, an API contract, or an infrastructure topology,
   explaining an intermittent concurrency or ordering failure, planning a migration whose rollback
   costs more than the migration, or settling a major medical, legal, or financial decision that is
   hard to reverse. A matching task on which the escalated tier has already made a serious attempt
   and failed to explain or resolve it qualifies as well. Those take the current surface's top
-  tier instead. Breadth alone stays with the escalated tier; a refactor stays there no matter how
-  many files it spans.
+  tier instead. Breadth alone establishes neither escalation nor the top-tier exception.
 - **Downshift**: the active tier is above what the task warrants. A new task that no Escalate trigger
   reaches uses the current surface's default tier under Tiers: in code, everyday implementation,
   editing, and review; outside code, explanations, drafting, everyday advice, and
@@ -188,13 +198,14 @@ is probably adequate.
   reaches a second repository or component, when a general question turns into one about the user's
   own health, money, or legal position, when the user questions the approach or the result, or when
   you have investigated a failure and still cannot explain it. A task rarely announces that it has
-  become a different task, and these are the moments where it has. Each of these is also an Escalate
-  trigger, so a re-check that finds one normally ends in a switch up rather than in keeping the
-  tier. Reviewing or verifying work the session already produced is where staying put is most
-  tempting and least often right. Use the current surface's escalated tier under Tiers; its top
-  tier applies only under the Escalate bullet's one-hard-question exception. Also recheck model
-  freshness when a newer stable release is identified, the account, workspace, provider, or
-  surface changes, or access is lost. These freshness checks alone do not raise the task tier
+  become a different task, and these events require reassessing the remaining work. They do not
+  automatically establish an Escalate condition. Keep the ordinary tier for routine corrections,
+  known release steps, and straightforward continuations. Escalate when the remaining work meets
+  a substantive condition in Escalate, explaining the actual reasoning problem or failure risk.
+  Correcting wording, checking completed work, or requesting a better explanation does not by
+  itself require a stronger model. The top tier applies only under Escalate's hard-question
+  exception. Also recheck model freshness when a newer stable release is identified, the account,
+  workspace, provider, or surface changes, or access is lost. These freshness checks alone do not raise the task tier
   or reasoning effort.
 
 ## Tiers
@@ -246,12 +257,13 @@ can reuse it. Never silently change a picker or configuration to satisfy the che
 - **Sonnet at medium, Thinking on**: the default tier. In code, implementation, editing,
   exploration, and review; outside code, explanations, drafting, everyday advice, and summaries of a
   web page or a document. Medium is Anthropic's default for Sonnet 5.5 and fits work with a clear
-  scope. Raise it to high where verification matters or edge cases are likely, such as fixing a bug
-  in an existing codebase or checking a summary against its source.
+  scope. Raise it to high when a specific unresolved behavior or competing failure paths need
+  more reasoning than medium; explain that need. Routine verification alone does not justify
+  an effort increase.
 - **Opus at high, Thinking on**: the escalated tier for any task an Escalate trigger matches but
   does not send to the top tier, including long-context synthesis. Opus 5.5 defaults to medium
-  and thinks more per level than Opus 5 did, so high is one step up for work where verification matters, which every Escalate
-  trigger describes.
+  and thinks more per level than Opus 5 did. Use high for the substantive reasoning or failure
+  risk identified by Escalate, with the task-specific justification required by Pause.
 - **Fable at high, Thinking on**: the top tier rather than a fallback, so route to it directly with
   no Sonnet or Opus attempt first when the Escalate trigger sends a task there. Fable decides and
   Opus executes, so the plan for a hard migration, or the decision in a hard personal choice, can be
@@ -302,18 +314,29 @@ user explicitly chooses the older version.
 - Sol with medium reasoning is the default tier for implementation, review, explanations,
   drafting, and ordinary research. Use the current stable Sol version for repeated,
   long-running work across code, apps, and documents, including code cleanup, flaky-test fixes,
-  and CI improvement. The escalated tier uses the selected Sol model at high or extra high.
-  Keep Astra for the top-tier cases defined by the Escalate trigger.
+  and CI improvement. Known release steps and settled implementation plans stay here even when
+  they span files or repositories. When the task meets Escalate, use Astra at light as the
+  stronger-model starting pair below; do not automatically insert Sol at high or extra high.
 - Terra with medium reasoning suits routine work that favors speed and efficiency, especially
   read-heavy exploration and supporting-document scans.
-- Luna with low reasoning is the mechanical tier for clear, repeatable work: predetermined
+- Luna with high reasoning is the mechanical starting pair for clear, repeatable work: predetermined
   commands, format-only edits, status checks, extraction, and structured summaries.
-- Astra is the top tier rather than an everyday upgrade, so route to it directly with no Sol attempt
-  first when the Escalate trigger sends a task there. Astra decides and Sol executes, so the plan for
-  a hard migration can be Astra work while the edits that follow are not. Use high reasoning, and
-  pair Astra with max or ultra only for a rare, exceptionally complex problem or when the user asks,
-  because cost compounds on both axes. Astra selects at low reasoning by default, so name the effort
-  alongside the model rather than taking what the picker offers.
+- Astra with light reasoning is the escalated starting pair for work requiring stronger judgment
+  under Escalate. Explain the actual ambiguity, interacting decisions, or failure risk that
+  warrants moving beyond Sol at medium. The established slider progression from Sol medium to
+  Astra light is a useful starting point, not proof of a measured quality or cost ranking.
+- Astra with medium reasoning is the top-tier starting pair for Escalate's hard-question
+  exception. Explain what warrants both the stronger model and more effort than Astra light.
+  Increase effort further only with a separate task-specific reason or evidence that the lower
+  effort was insufficient. Reserve max or ultra for rare, exceptionally complex work or the
+  user's explicit quality-first request, subject to the delegation conditions below. Astra
+  decides and Sol executes: a hard migration decision can need Astra while implementing a
+  settled plan stays on Sol. On OpenAI GUI surfaces, light corresponds to `low` in configuration.
+- Sol at high or extra high remains a manual option when a concrete task or budget tradeoff
+  justifies it over both Sol medium and Astra light. Name that tradeoff before recommending it.
+  Do not assume that more Sol reasoning is cheaper overall or equivalent to Astra light.
+  Without that justification, use the appropriate starting pair above. Do not invent a fixed
+  effort ranking across model families.
 - Use Sol at ultra when the task splits into meaningful independent workstreams and the user has
   asked for or allowed multi-agent work, and that model's current picker exposes ultra; ultra
   spawns internal sub-agents rather than deepening a single chain of thought. Reserve Astra at
@@ -337,11 +360,12 @@ user explicitly chooses the older version.
   preset label or position when the current slider layout is unknown.
   Do not apply CLI commands or `config.toml` instructions to hosted Work. Omit the Claude
   Thinking line.
-- In Codex runtimes that support local subagent configuration, subagents inherit
+- In Codex runtimes that support local subagent configuration, subagents can inherit
   `default_subagent_model` and `default_subagent_reasoning_effort` from the `[agents]` table in
-  `config.toml`, so a cheap default covers mechanical fan-out but lands on demanding work too. When a spawned subagent's
-  task is not mechanical, set `model` and `reasoning_effort` on the spawn to the tier the task
-  warrants, judged by the same triggers as the session-level check. That override needs
+  `config.toml`. Compare that pair with the task's recommendation, including the mechanical
+  starting pair. When they differ, set `model` and `reasoning_effort` explicitly on the spawn
+  to the pair the task warrants, judged by the same triggers as the session-level check.
+  Do not assume an inherited cheap default matches the reviewed effort. An override needs
   `fork_turns` set to `"none"` or a positive integer, because a full-history fork inherits the
   parent's tier and rejects overrides.
 

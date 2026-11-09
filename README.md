@@ -19,7 +19,7 @@ agent gets a short brief and returns its findings to the main session. Both stro
 agents qualify, subject to the current runtime's tools, permissions, and model access. Delegation
 consumes usage for the child and the handoff; a saving is not guaranteed.
 
-For a top-tier recommendation, preflight briefly explains the benefit and expected allowance
+For an Astra or top-tier recommendation, preflight briefly explains the benefit and expected allowance
 impact. It reports remaining allowance only when the host or user supplies it. Where a viable
 way to conserve usage exists, it offers one option with its scope or quality tradeoff. Choosing
 that option explicitly approves the described path; a required picker change still uses the
@@ -28,6 +28,11 @@ switch handshake. The plugin does not calculate task prices or remaining subscri
 Downshift decisions distinguish changing models from changing effort within one model. Cache
 reuse and conversation-processing costs depend on the provider and client. Preflight uses relevant
 documentation or observed behavior where available and states uncertainty otherwise.
+
+Re-check events reassess the remaining work. More files, another repository, user feedback, or
+another review round does not automatically justify a stronger setting. A switch recommendation
+must identify the actual reasoning problem or failure risk, explain why the lower setting is
+insufficient, and state what the proposed model and effort pair adds.
 
 ## Where it runs
 
@@ -266,9 +271,13 @@ the `## Tiers` section and leave the rest, or rewrite all of it.
 
 In Work and Codex, GPT-6.1 Sol is the latest reviewed Sol version; preflight verifies that it is
 still current and available before task work. Code cleanup, flaky-test fixes, and CI improvements
-are useful examples. Medium remains the starting effort for normal work; existing escalation
-triggers raise it to high or extra high, and the top-tier cases still use Astra. GPT-6 Sol
-requires an explicit choice to use an older version, even for a small task. See the official
+are useful examples. Sol medium remains the starting pair for normal work, including known
+release sequences across repositories. Substantive escalation starts with Astra light; the
+hard-question exception starts with Astra medium. Further effort needs its own task-specific
+justification. Sol high and extra high remain manual options when a concrete task or budget
+tradeoff justifies them over both Sol medium and Astra light. These starting pairs are routing
+judgments, not a measured quality or cost ranking. Luna high is the mechanical starting pair.
+GPT-6 Sol requires an explicit choice to use an older version, even for a small task. See the official
 [model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
 [software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
 Use the effort levels supported by the current Work or Codex client's presets or manual controls;
