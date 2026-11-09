@@ -269,6 +269,14 @@ needs rebuilding, and neither hook script holds a copy.
 The tier table there is one person's mapping of task shapes to models. Yours will differ. Rewrite
 the `## Tiers` section and leave the rest, or rewrite all of it.
 
+For Claude, general coding and knowledge work starts on Opus 5.5 at medium. Clear, scoped work
+and interactive chat use Sonnet 5.5 at medium. Haiku 5.5 uses low for trivial work and medium for
+high-volume extraction or bounded reading. Substantive escalations use Opus high; the hardest
+decisions use Fable 5.2, starting at medium in Claude Code and retaining high in chat and Cowork.
+Those are policy choices, not claims that every product has the same default. Thinking is fixed
+on for the current models in Code and chat, so their pauses omit that control. See the
+[Claude release review](docs/reviews/2026-11-09-claude-fable-5-2.md) for sources and limits.
+
 In Work and Codex, GPT-6.1 Sol is the latest reviewed Sol version; preflight verifies that it is
 still current and available before task work. Code cleanup, flaky-test fixes, and CI improvements
 are useful examples. Sol medium remains the starting pair for normal work, including known

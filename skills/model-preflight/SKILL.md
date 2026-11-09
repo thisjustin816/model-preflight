@@ -162,7 +162,8 @@ is probably adequate.
   and failed to explain or resolve it qualifies as well. Those take the current surface's top
   tier instead. Breadth alone establishes neither escalation nor the top-tier exception.
 - **Downshift**: the active tier is above what the task warrants. A new task that no Escalate trigger
-  reaches uses the current surface's default tier under Tiers: in code, everyday implementation,
+  reaches uses the current surface's ordinary-work pair under Tiers, including its scoped-work
+  starting pair where applicable: in code, everyday implementation,
   editing, and review; outside code, explanations, drafting, everyday advice, and
   summarizing a web page or an ordinary document. A session sitting above that recommends a change
   when the remaining work justifies its switching overhead. Distinguish a model switch from an
@@ -250,25 +251,53 @@ can reuse it. Never silently change a picker or configuration to satisfy the che
 
 ### Claude
 
+The latest stable versions reviewed November 9, 2026, are Haiku 5.5, Sonnet 5.5, Opus 5.5,
+and Fable 5.2. Verify freshness and account access under Current versions within each tier.
+The starting pairs below are routing judgments informed by Anthropic's task guidance;
+Claude Code defaults do not establish defaults in chat, Cowork, or the API.
+
 - **Haiku at low where effort is available**: the mechanical tier for quick facts, simple lookups,
-  reformatting, and predetermined mechanical work. Haiku 5.5 supports effort; older Haiku models
-  can lack it, so use a model-only pause there. Leave Thinking on where the model requires it. Turn it off for
-  this tier only where the selected model and surface expose that choice.
-- **Sonnet at medium, Thinking on**: the default tier. In code, implementation, editing,
-  exploration, and review; outside code, explanations, drafting, everyday advice, and summaries of a
-  web page or a document. Medium is Anthropic's default for Sonnet 5.5 and fits work with a clear
-  scope. Raise it to high when a specific unresolved behavior or competing failure paths need
-  more reasoning than medium; explain that need. Routine verification alone does not justify
-  an effort increase.
+  reformatting, and predetermined mechanical work. For high-volume classification, routing,
+  extraction, or a bounded file/log-reading subagent, start Haiku 5.5 at medium, its default.
+  Low remains appropriate for trivial interactive work. Older Haiku models can lack effort;
+  omit unsupported controls. Keep the execution-mode support gate in Downshift.
+- **Sonnet at medium**: the scoped-work starting pair for spec-driven features, bounded bug fixes,
+  editing, exploration, repeatable reviews, interactive chat, explanations, and ordinary summaries.
+  Use it when the work and success criteria are clear and no Escalate trigger applies. For everyday
+  documents, slides, and spreadsheets, start at high outside Claude Code; medium is the Code
+  starting point. Raise effort for a concrete reasoning need, not routine verification alone.
+- **Opus at medium**: the default for general coding and knowledge work whose path still needs
+  investigation, including everyday debugging, feature work requiring ongoing judgment, and
+  computer-use workflows. Choose Sonnet for the scoped cases above. A clear spec alone does not
+  make a difficult migration or performance problem scoped work; apply Escalate to the actual
+  interacting behavior and failure risk. Uncertainty about task scope starts here unless an
+  Escalate trigger already requires a stronger pair.
 - **Opus at high, Thinking on**: the escalated tier for any task an Escalate trigger matches but
-  does not send to the top tier, including long-context synthesis. Opus 5.5 defaults to medium
-  and thinks more per level than Opus 5 did. Use high for the substantive reasoning or failure
-  risk identified by Escalate, with the task-specific justification required by Pause.
-- **Fable at high, Thinking on**: the top tier rather than a fallback, so route to it directly with
-  no Sonnet or Opus attempt first when the Escalate trigger sends a task there. Fable decides and
-  Opus executes, so the plan for a hard migration, or the decision in a hard personal choice, can be
-  Fable work while what follows is not. Pair Fable with max effort only for a rare, exceptionally
-  complex problem or when the user asks, because cost compounds on both axes.
+  does not send to the top tier, including long-context synthesis. Explain the substantive
+  reasoning need beyond medium under Pause. Effort names are calibrated per model; do not
+  carry a previous generation's effort forward as an equivalent setting.
+- **Fable at medium in Claude Code; high in chat and Cowork**: the top-tier starting pair for
+  Escalate's hard-question exception, including major migrations with costly rollback and hard
+  architecture or scientific decisions. Route directly here when that exception applies; no
+  failed Opus attempt is required. An escalated task that Opus high seriously attempted and
+  failed also qualifies. Fable 5.2 defaults to medium in Code and high on the API; the API default
+  does not prove a chat or Cowork default. High in those products retains this policy's prior
+  starting point. Explain any increase above the starting pair separately. Reassess a long
+  unattended run's sustained judgment needs; duration or file count alone does not make it top-tier.
+  Fable can decide a hard plan and Opus execute settled work. Reserve max for a rare, exceptionally
+  complex problem or the user's quality-first choice.
+
+For a task that does not already require escalation, first ensure the model can check its output,
+then consider one effort step before changing families. Before raising Opus beyond high, consider
+Fable 5.2 at its lower starting effort and explain the task-specific tradeoff. Do not require that
+trial when Escalate already warrants Fable. Neither benchmarks nor API token prices establish
+cost per finished task or subscription savings for the user's work.
+
+On Claude, switching model families creates a new model-specific prompt cache for the conversation.
+Prefer a natural task boundary, a compacted context, or a fresh brief where useful. An effort-only
+change can behave differently by model and client; do not assume it has the same cache cost.
+A move down from Fable 5.2 drops its preserved reasoning on the API, so include decisions and
+constraints in the handoff. Do not extrapolate API history behavior to every product surface.
 
 Settings on every Claude surface:
 
@@ -277,7 +306,10 @@ Settings on every Claude surface:
   Reserve max for demanding quality-first work where extra latency and possible overthinking
   are acceptable.
 - **Thinking** can be fixed on or separately selectable, depending on the selected model and
-  surface. Where selectable, turn it on for implementation, review, exploration, debugging,
+  surface. In Claude Code and Claude chat, Haiku 5.5, Sonnet 5.5, Opus 5.5, and Fable models
+  keep Thinking on; omit the Thinking line in their switch pauses. API-only disable options
+  do not establish a product toggle. Check Cowork's current controls separately.
+  Where selectable, turn it on for implementation, review, exploration, debugging,
   planning, research, and advice. Turn it off only when the whole task is predetermined and
   mechanical, or when latency matters more than reasoning. Leave it on where required and omit
   its pause line when the user cannot change it.
@@ -301,6 +333,11 @@ Claude Code only:
   aliases fable, opus, sonnet, and haiku, never a dated snapshot.
 - An alias can resolve to an older release on a different provider or client. Check its actual
   resolution against current provider guidance; the alias name alone does not prove freshness.
+  Fable 5.2 needs Code v2.1.321 or later. The `fable` alias still resolves to Fable 5 through
+  Claude apps gateway unless configured otherwise; verify that gateway serves 5.2 before
+  selecting its current model ID. Haiku still resolves to 4.5 on some third-party providers.
+  Keep ordinary configuration on plain aliases; an explicit current-version ID can be needed
+  for a provider-specific selection. Older alias resolution does not waive the version gate.
 
 ### OpenAI agent surfaces: Codex and ChatGPT Work
 
