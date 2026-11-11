@@ -3,8 +3,8 @@
 Requires the latest stable model version within the task's tier, checks effort before work
 starts, and says out loud which setting it picked. An older version requires an explicit choice.
 
-The problem it solves is quiet mismatch in both directions. A session left on a small model walks
-into a security review or a cross-repo refactor and does it badly. A session left on a top-tier
+The problem it solves is quiet mismatch in both directions. A session chosen for routine edits
+can reach an unresolved security or architecture decision. A session left on a top-tier
 model answers a status question and spends the quota anyway. Neither announces itself, and a check
 that happens silently in the model's head is indistinguishable from one that never happened.
 
@@ -33,6 +33,11 @@ Re-check events reassess the remaining work. More files, another repository, use
 another review round does not automatically justify a stronger setting. A switch recommendation
 must identify the actual reasoning problem or failure risk, explain why the lower setting is
 insufficient, and state what the proposed model and effort pair adds.
+
+Security escalation requires substantive judgment about exploitability, trust boundaries, or
+access design. Routine error logging, documented API scope corrections, and established security
+patterns use the ordinary tier unless they introduce that reasoning problem. The security
+[trigger review](docs/reviews/2026-11-11-security-trigger.md) records the boundary examples.
 
 ## Where it runs
 
