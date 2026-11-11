@@ -36,8 +36,7 @@ insufficient, and state what the proposed model and effort pair adds.
 
 Security escalation requires substantive judgment about exploitability, trust boundaries, or
 access design. Routine error logging, documented API scope corrections, and established security
-patterns use the ordinary tier unless they introduce that reasoning problem. The security
-[trigger review](docs/reviews/2026-11-11-security-trigger.md) records the boundary examples.
+patterns use the ordinary tier unless they introduce that reasoning problem.
 
 ## Where it runs
 
@@ -279,8 +278,8 @@ and interactive chat use Sonnet 5.5 at medium. Haiku 5.5 uses low for trivial wo
 high-volume extraction or bounded reading. Substantive escalations use Opus high; the hardest
 decisions use Fable 5.2, starting at medium in Claude Code and retaining high in chat and Cowork.
 Those are policy choices, not claims that every product has the same default. Thinking is fixed
-on for the current models in Code and chat, so their pauses omit that control. See the
-[Claude release review](docs/reviews/2026-11-09-claude-fable-5-2.md) for sources and limits.
+on for the current models in Code and chat, so their pauses omit that control. See
+[Claude model configuration](https://code.claude.com/docs/en/model-config) for provider guidance.
 
 In Work and Codex, GPT-6.1 Sol is the latest reviewed Sol version; preflight verifies that it is
 still current and available before task work. Code cleanup, flaky-test fixes, and CI improvements
