@@ -138,12 +138,16 @@ Use these task shapes when deciding whether the active setting should change. Do
 certainty that a switch would help, and do not dismiss a matching trigger because the current model
 is probably adequate.
 
-- **Escalate**: in code, security-sensitive work, meaning judging a security finding or changing how
-  code handles untrusted input, auth, secrets, or permissions, as opposed to prose that merely
-  mentions them; a bug still unexplained after actually reading the code involved, not merely
-  not-yet-investigated; a migration or refactor requiring decisions about interacting behavior or
-  contracts; and infrastructure changes that destroy or replace resources. Outside code, advice
-  with real medical, legal, financial, or safety consequences, such as reading symptoms, test
+- **Escalate**: in code, security analysis or design requiring substantive judgment about
+  exploitability, trust boundaries, privilege escalation, or competing ways to handle
+  authentication, authorization, secrets, or untrusted input. Routine error logging, a documented
+  API scope correction, or applying an established security pattern stays on the ordinary tier
+  unless it introduces such a reasoning problem. Mentioning an auth API, permission, secret, or
+  scanner finding alone is not enough. Also escalate for a bug still unexplained after actually
+  reading the code involved, not merely not-yet-investigated; a migration or refactor requiring
+  decisions about interacting behavior or contracts; and infrastructure changes that destroy or
+  replace resources. Outside code, advice with real medical, legal, financial, or safety
+  consequences, such as reading symptoms, test
   results, a prescription, a contract, or a tax
   question; research that has to reconcile many sources or conflicting evidence; and synthesis
   across a long document or several documents. Anywhere, design or decision work with several

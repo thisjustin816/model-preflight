@@ -16,8 +16,10 @@ Record the starting commit, review date, and the last covered release date for e
 there is no earlier evidence record, review all model families the policy currently recommends.
 Keep unfinished findings visible; an unmerged proposal is not the published baseline.
 
-Use a dated review document or the PR body for this run. Record public product facts there;
-keep account identifiers, credentials, and private workspace details out of published evidence.
+Keep the review record in the PR body. Do not commit dated review reports, test-run summaries,
+progress updates, or pending release and installation status. Put durable rules and supporting
+public source links in the policy or README. Keep account identifiers, credentials, and private
+workspace details out of published evidence.
 
 ## 2. Fetch current primary sources in the same order
 
@@ -95,7 +97,7 @@ claims throughout the policy rather than adding another exception beside them.
 Update the canonical skill and affected README or manifest descriptions together. Check shared
 instruction pointers, generated cloud instructions, runtime mirrors, model-routed skills, and
 published pins that consume the policy. Apply the existing sync workflow where shared content
-changes. Keep research and source notes outside the hook's injected sections.
+changes. Keep research and verification notes in the PR body.
 
 ## 6. Verify and publish through the existing release process
 
@@ -122,7 +124,7 @@ authorization.
 
 ## Completion record
 
-Finish the dated review or PR with the baseline and review date; source links and effective
+Finish the PR body with the baseline and review date; source links and effective
 dates; changed and retained criteria with reasons; surface and access limits; verification
 results and gaps; unresolved findings; and the published commit/tag or pending publication step.
-That record is the starting point for the next refresh.
+Use the previous merged PR as the starting point for the next refresh.
