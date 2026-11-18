@@ -345,12 +345,24 @@ Claude Code only:
 
 ### OpenAI agent surfaces: Codex and ChatGPT Work
 
-The latest stable versions reviewed November 2, 2026, are GPT-6.1 Sol (`gpt-6.1-sol`), GPT-6.1
-Terra (`gpt-6.1-terra`), GPT-6 Luna (`gpt-6-luna`), and GPT-6 Astra (`gpt-6-astra`). Verify their
-freshness and availability under Current versions within each tier; this list is a starting point
-for that check. GPT-6 Sol is an older Sol version. Unknown 6.1 access requires the discovery
-pause, and confirmed 6.1 access requires a switch from 6 Sol even for a small task, unless the
-user explicitly chooses the older version.
+The latest stable versions reviewed November 18, 2026, are GPT-6.2 Sol (`gpt-6.2-sol`), GPT-6.1
+Terra (`gpt-6.1-terra`), GPT-6 Luna (`gpt-6-luna`), and GPT-6.2 Astra (`gpt-6.2-astra`). Verify
+freshness and availability under Current versions within each tier; this list starts that check.
+The [6.2 rollout guidance](https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt)
+covers Work and Codex, not regular Chat. Access depends on the client, plan, workspace permissions,
+and rollout progress. Enterprise and Edu require
+[admin enablement](https://learn.chatgpt.com/docs/enterprise/workspace-model-availability#gpt-62-astra-and-gpt-62-sol-in-enterprise-and-edu).
+Unknown 6.2 access requires the discovery pause. Confirmed access requires switching from an
+older version in that family, including 6.1 Sol or 6 Astra, even for a small task, unless the user
+explicitly chooses the older version. When 6.2 is unavailable, ask once whether to continue on
+the named older version or stop; reuse that choice within its accepted scope.
+
+The starting pairs below are policy judgments informed by the
+[Work and Codex selection guide](https://learn.chatgpt.com/docs/model-selection).
+They are not measured equivalences between generations or universal product defaults. New Work
+chats default to Sol light on supported consumer plans and medium in enabled Enterprise workspaces;
+the [launch guidance](https://learn.chatgpt.com/docs/whats-new/gpt-62-astra-sol) does not establish
+one default for every Codex client.
 
 - Sol with medium reasoning is the default tier for implementation, review, explanations,
   drafting, and ordinary research. Use the current stable Sol version for repeated,
@@ -364,8 +376,8 @@ user explicitly chooses the older version.
   commands, format-only edits, status checks, extraction, and structured summaries.
 - Astra with light reasoning is the escalated starting pair for work requiring stronger judgment
   under Escalate. Explain the actual ambiguity, interacting decisions, or failure risk that
-  warrants moving beyond Sol at medium. The established slider progression from Sol medium to
-  Astra light is a useful starting point, not proof of a measured quality or cost ranking.
+  warrants moving beyond Sol at medium. This starting pair is a routing judgment, not proof of
+  a measured quality or cost ranking or a particular slider layout.
 - Astra with medium reasoning is the top-tier starting pair for Escalate's hard-question
   exception. Explain what warrants both the stronger model and more effort than Astra light.
   Increase effort further only with a separate task-specific reason or evidence that the lower

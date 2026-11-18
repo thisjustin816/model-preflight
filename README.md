@@ -281,17 +281,26 @@ Those are policy choices, not claims that every product has the same default. Th
 on for the current models in Code and chat, so their pauses omit that control. See
 [Claude model configuration](https://code.claude.com/docs/en/model-config) for provider guidance.
 
-In Work and Codex, GPT-6.1 Sol is the latest reviewed Sol version; preflight verifies that it is
-still current and available before task work. Code cleanup, flaky-test fixes, and CI improvements
-are useful examples. Sol medium remains the starting pair for normal work, including known
+In Work and Codex, GPT-6.2 Sol and GPT-6.2 Astra are the latest reviewed versions in their
+families; Terra remains at 6.1 and Luna at 6. Preflight verifies freshness and access before task
+work. The [6.2 rollout](https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt)
+depends on the client, plan, workspace permissions, and rollout progress. Unknown access prompts
+one question; unavailable 6.2 requires an explicit choice to continue on a named older version.
+Enterprise and Edu require admin enablement. This rollout does not add 6.2 to regular Chat.
+
+Code cleanup, flaky-test fixes, and CI improvements are useful examples. Sol medium remains
+the starting pair for normal work, including known
 release sequences across repositories. Substantive escalation starts with Astra light; the
 hard-question exception starts with Astra medium. Further effort needs its own task-specific
 justification. Sol high and extra high remain manual options when a concrete task or budget
 tradeoff justifies them over both Sol medium and Astra light. These starting pairs are routing
 judgments, not a measured quality or cost ranking. Luna high is the mechanical starting pair.
-GPT-6 Sol requires an explicit choice to use an older version, even for a small task. See the official
-[model guidance](https://learn.chatgpt.com/docs/models?surface=web) and
-[software maintenance examples](https://developers.openai.com/blog/maintaining-software-with-the-gpt-6-family).
+GPT-6.1 Sol, GPT-6 Sol, and GPT-6 Astra require an explicit choice to use an older version,
+even for a small task. The policy's starting efforts differ from some product defaults: new
+Work chats use Sol light on supported consumer plans and medium in enabled Enterprise workspaces.
+See the official [model guidance](https://learn.chatgpt.com/docs/models?surface=web),
+[task and effort examples](https://learn.chatgpt.com/docs/model-selection), and
+[6.2 launch guidance](https://learn.chatgpt.com/docs/whats-new/gpt-62-astra-sol).
 Use the effort levels supported by the current Work or Codex client's presets or manual controls;
 API controls can differ. Recommendations are not limited to the pairs on the app's preset slider.
 
