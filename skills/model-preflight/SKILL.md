@@ -169,8 +169,14 @@ is probably adequate.
   reaches uses the current surface's ordinary-work pair under Tiers, including its scoped-work
   starting pair where applicable: in code, everyday implementation,
   editing, and review; outside code, explanations, drafting, everyday advice, and
-  summarizing a web page or an ordinary document. A session sitting above that recommends a change
-  when the remaining work justifies its switching overhead. Distinguish a model switch from an
+  summarizing a web page or an ordinary document. At the start of a conversation, or right after
+  compaction, when little or no history remains, there is no cache worth keeping and the history is
+  small, so treat switching cost as zero: the active model and effort must match the tier for the
+  task, and when the active tier is above it the verdict recommends the switch through the Pause
+  flow. The break-even test and the one-off exemption below do not apply there, and "switching
+  costs more than it saves" is never a valid reason to stay when the conversation is new or freshly
+  compacted. Mid-session, a session sitting above that recommends a
+  change when the remaining work justifies its switching overhead. Distinguish a model switch from an
   effort-only change. A model switch can require the conversation to be processed on the new model;
   cache reuse depends on the current provider and client. An effort-only change can preserve or
   invalidate the cache depending on the model, client, and how that change is sent. Use relevant
@@ -181,9 +187,10 @@ is probably adequate.
   A whole task that is predetermined and mechanical and will hold the session for a while, such as a
   format-only pass across a tree, a batch of renames, a series of status checks, or a run of quick
   facts, lookups, or reformatting, recommends that surface's mechanical tier on the same test.
-  A one-off task, such as a single rename, a status check, a known command, a directly invoked
-  commit-and-push skill, or a single quick fact, is never worth a pause, and in a long session
-  neither is any other task too small to repay its switching overhead: hand it to a subagent on the
+  Only mid-session, in a conversation that already carries substantial history, a one-off task, such
+  as a single rename, a status check, a known command, a directly invoked commit-and-push skill, or
+  a single quick fact, is never worth a pause, and neither is any other task too small to repay its
+  switching overhead: hand it to a subagent on the
   cheaper tier where Delegation under Tiers favors one and a short brief justifies the handoff;
   otherwise keep it on the session model.
   Say in the verdict whether you are switching, delegating, or staying. A directly invoked skill
