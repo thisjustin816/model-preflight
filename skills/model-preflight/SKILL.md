@@ -169,12 +169,13 @@ is probably adequate.
   reaches uses the current surface's ordinary-work pair under Tiers, including its scoped-work
   starting pair where applicable: in code, everyday implementation,
   editing, and review; outside code, explanations, drafting, everyday advice, and
-  summarizing a web page or an ordinary document. At the start of a conversation, with no prior
-  task work and little or no history, there is no history or cache to lose, so treat switching cost
-  as zero: the active model and effort must match the tier for the task, and when the active tier is
-  above it the verdict recommends the switch through the Pause flow. The break-even test and the
-  one-off exemption below do not apply there, and "switching costs more than it saves" is never a
-  valid reason to stay in a new conversation. Mid-session, a session sitting above that recommends a
+  summarizing a web page or an ordinary document. At the start of a conversation, or right after
+  compaction, when little or no history remains, there is no cache worth keeping and the history is
+  small, so treat switching cost as zero: the active model and effort must match the tier for the
+  task, and when the active tier is above it the verdict recommends the switch through the Pause
+  flow. The break-even test and the one-off exemption below do not apply there, and "switching
+  costs more than it saves" is never a valid reason to stay when the conversation is new or freshly
+  compacted. Mid-session, a session sitting above that recommends a
   change when the remaining work justifies its switching overhead. Distinguish a model switch from an
   effort-only change. A model switch can require the conversation to be processed on the new model;
   cache reuse depends on the current provider and client. An effort-only change can preserve or
